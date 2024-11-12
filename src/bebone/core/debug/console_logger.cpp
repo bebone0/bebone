@@ -23,9 +23,10 @@ namespace bebone::core {
         time_stream << std::put_time(&tm, "%H:%M:%S");
         auto formatted_time = time_stream.str();
 
-        const auto prefix = std::format("{}[{} {}{}{}] ", UnixConsoleColors::Gray, formatted_time, log_level_color, log_level_str, UnixConsoleColors::Gray);
+        std::stringstream ss;
+        ss << UnixConsoleColors::Gray << "[" << formatted_time << " " << log_level_color << log_level_str << UnixConsoleColors::Gray << "] ";
 
-        stream << prefix << UnixConsoleColors::Default << format << std::endl;
+        stream << prefix.str() << UnixConsoleColors::Default << format << std::endl;
     }
 
     void ConsoleLogger::log(const LogLevel& level, std::string_view format, std::format_args&& args) {
@@ -45,9 +46,10 @@ namespace bebone::core {
         time_stream << std::put_time(&tm, "%H:%M:%S");
         auto formatted_time = time_stream.str();
 
-        const auto prefix = std::format("{}[{} {}{}{}] ", UnixConsoleColors::Gray, formatted_time, log_level_color, log_level_str, UnixConsoleColors::Gray);
+        std::stringstream ss;
+        ss << UnixConsoleColors::Gray << "[" << formatted_time << " " << log_level_color << log_level_str << UnixConsoleColors::Gray << "] ";
 
-        stream << prefix << UnixConsoleColors::Default << std::vformat(format, args) << std::endl;
+        stream << prefix.str() << UnixConsoleColors::Default << std::vformat(format, args) << std::endl;
     }
 
     void ConsoleLogger::set_log_level(const LogLevel& level) {

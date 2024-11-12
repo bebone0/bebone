@@ -1,7 +1,6 @@
 #ifndef _BEBONE_CORE_CONSOLE_LOGGER_H_
 #define _BEBONE_CORE_CONSOLE_LOGGER_H_
 
-#include <format>
 #include <ctime>
 #include <iomanip>
 #include <source_location>
