@@ -55,8 +55,8 @@ namespace bebone::gfx {
 
             ~VulkanSwapChain();
 
-            const size_t& get_current_frame() const;
-            const VkExtent2D& get_extent() const;
+            [[nodiscard]] const size_t& get_current_frame() const;
+            [[nodiscard]] const VkExtent2D& get_extent() const;
 
             std::unique_ptr<VulkanRenderPass> render_pass;
             std::unique_ptr<VulkanRenderTarget> render_target;

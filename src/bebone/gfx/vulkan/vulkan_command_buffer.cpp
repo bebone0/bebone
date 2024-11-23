@@ -1,16 +1,15 @@
 #include "vulkan_command_buffer.h"
 
 #include "vulkan_pipeline_layout.h"
-#include "vulkan_command_buffer_pool.h"
 #include "vulkan_descriptor_set.h"
 
 namespace bebone::gfx {
-    VulkanCommandBuffer::VulkanCommandBuffer(IVulkanDevice& device, VulkanCommandBufferPool& command_buffer_pool) : device_owner(device) {
+    VulkanCommandBuffer::VulkanCommandBuffer(IVulkanDevice& device, IVulkanCommandBufferPool& command_buffer_pool) : device_owner(device) {
         VkCommandBufferAllocateInfo alloc_info{};
 
         alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        alloc_info.commandPool = command_buffer_pool.command_buffer_pool;
+        alloc_info.commandPool = command_buffer_pool.get_vk_command_buffer_pool();
         alloc_info.commandBufferCount = static_cast<uint32_t>(1); // Todo
 
         if(vkAllocateCommandBuffers(device_owner.get_vk_device(), &alloc_info, &command_buffer) != VK_SUCCESS) {

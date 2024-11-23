@@ -29,22 +29,14 @@ namespace bebone::gfx {
         LOG_TRACE("Freed Vulkan device memory");
     }
 
-    void VulkanDeviceMemory::bind_buffer_memory(VulkanBuffer& buffer) {
+    void VulkanDeviceMemory::bind_buffer_memory(IVulkanBuffer& buffer) {
         auto vk_buffer = buffer.get_vk_buffer();
         vkBindBufferMemory(device_owner.get_vk_device(), vk_buffer, device_memory, 0);
     }
 
-    void VulkanDeviceMemory::bind_buffer_memory(std::unique_ptr<VulkanBuffer>& buffer) {
-        bind_buffer_memory(*buffer);
-    }
-
-    void VulkanDeviceMemory::bind_image_memory(VulkanImage& image) {
+    void VulkanDeviceMemory::bind_image_memory(IVulkanImage& image) {
         auto vk_image = image.get_vk_image();
         vkBindImageMemory(device_owner.get_vk_device(), vk_image, device_memory, 0);
-    }
-
-    void VulkanDeviceMemory::bind_image_memory(std::unique_ptr<VulkanImage>& image) {
-        bind_image_memory(*image);
     }
 
     void VulkanDeviceMemory::map(const size_t& size, void** data) {

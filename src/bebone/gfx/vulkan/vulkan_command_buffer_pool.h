@@ -19,12 +19,13 @@ namespace bebone::gfx {
 
         public:
             VulkanCommandBufferPool(IVulkanDevice& device);
-            ~VulkanCommandBufferPool();
+            ~VulkanCommandBufferPool() override;
 
             std::unique_ptr<VulkanCommandBuffer> create_command_buffer();
             std::vector<std::unique_ptr<VulkanCommandBuffer>> create_command_buffers(const size_t& count);
 
             // Vulkan Command Buffer Pool
+            [[nodiscard]] VkCommandPool get_vk_command_buffer_pool() const override;
             VkCommandBuffer begin_single_time_commands() override;
             void end_single_time_commands(VkCommandBuffer command_buffer) override;
     };

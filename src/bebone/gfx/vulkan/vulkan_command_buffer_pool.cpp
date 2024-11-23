@@ -41,6 +41,10 @@ namespace bebone::gfx {
         return command_buffers;
     }
 
+    VkCommandPool VulkanCommandBufferPool::get_vk_command_buffer_pool() const {
+        return command_buffer_pool;
+    }
+
     // Todo, rethink single time commands
     VkCommandBuffer VulkanCommandBufferPool::begin_single_time_commands() {
         VkCommandBufferAllocateInfo alloc_info{};

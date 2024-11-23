@@ -6,7 +6,6 @@
 #include "vulkan_descriptor_pool.h"
 
 namespace bebone::gfx {
-    class VulkanDevice;
     class VulkanDescriptorSetLayoutBinding;
 
     class VulkanDescriptorSetLayout : private core::NonCopyable {

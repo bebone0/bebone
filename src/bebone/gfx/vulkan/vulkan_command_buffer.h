@@ -10,12 +10,11 @@
 #include "vulkan_pipeline.h"
 
 #include "interface/i_vulkan_buffer.h"
+#include "interface/i_vulkan_command_buffer_pool.h"
 
 namespace bebone::gfx {
     using namespace bebone::core;
 
-    class VulkanDevice;
-    class VulkanCommandBufferPool;
     class VulkanDescriptorSet;
 
     class VulkanCommandBuffer : private core::NonCopyable {
@@ -28,7 +27,7 @@ namespace bebone::gfx {
         public:
             using Self = VulkanCommandBuffer;
 
-            VulkanCommandBuffer(IVulkanDevice& device, VulkanCommandBufferPool& command_buffer_pool);
+            VulkanCommandBuffer(IVulkanDevice& device, IVulkanCommandBufferPool& command_buffer_pool);
 
             Self& begin_record();
             Self& end_record();

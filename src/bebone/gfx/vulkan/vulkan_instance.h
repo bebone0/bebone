@@ -11,8 +11,6 @@
 #include "interface/i_vulkan_instance.h"
 
 namespace bebone::gfx {
-    class VulkanDevice;
-
     class VulkanInstance : public IVulkanInstance, private core::NonCopyable {
         private:
             VkInstance instance;

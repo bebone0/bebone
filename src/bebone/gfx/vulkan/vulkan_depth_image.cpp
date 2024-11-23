@@ -13,7 +13,7 @@ namespace bebone::gfx {
         auto req = image->get_memory_requirements();
 
         memory = std::make_unique<VulkanDeviceMemory>(device, req, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        memory->bind_image_memory(image);
+        memory->bind_image_memory(*image);
 
         VulkanImageViewInfo image_view_info{};
         image_view_info.subresource_range = { .aspect_mask = VK_IMAGE_ASPECT_DEPTH_BIT };

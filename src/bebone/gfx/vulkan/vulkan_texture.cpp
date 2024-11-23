@@ -21,7 +21,7 @@ namespace bebone::gfx {
 
         auto req = image->get_memory_requirements();
         memory = std::make_unique<VulkanDeviceMemory>(device, req, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        memory->bind_image_memory(image);
+        memory->bind_image_memory(*image);
 
         image->transition_layout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
@@ -48,7 +48,7 @@ namespace bebone::gfx {
 
         auto req = image->get_memory_requirements();
         memory = std::make_unique<VulkanDeviceMemory>(device, req, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        memory->bind_image_memory(image);
+        memory->bind_image_memory(*image);
 
         sampler = std::make_unique<VulkanSampler>(device);
         view = std::make_unique<VulkanImageView>(device, *image, image_format);

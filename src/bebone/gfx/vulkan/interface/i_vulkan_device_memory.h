@@ -3,6 +3,9 @@
 
 #include "../../gfx_backend.h"
 
+#include "i_vulkan_buffer.h"
+#include "i_vulkan_image.h"
+
 namespace bebone::gfx {
     using namespace bebone::core;
 
@@ -11,6 +14,12 @@ namespace bebone::gfx {
             virtual ~IVulkanDeviceMemory() = default;
 
             [[nodiscard]] virtual VkDeviceMemory get_vk_device_memory() const = 0;
+            virtual void bind_buffer_memory(IVulkanBuffer& buffer) = 0;
+            virtual void bind_image_memory(IVulkanImage& image) = 0;
+            virtual void map(const size_t& size, void** data) = 0;
+            virtual void unmap() = 0;
+            virtual void upload_data(const void* src, const size_t& size) = 0;
+            
     };
 }
 

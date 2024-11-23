@@ -47,6 +47,5 @@
 
 #include "vulkan_depth_image.h"
 #include "vulkan_swap_chain_image.h"
-#include "vulkan_image_memory.h"
 
 #endif

@@ -16,8 +16,6 @@
 #include "interface/i_vulkan_sampler.h"
 
 namespace bebone::gfx {
-    class VulkanDevice;
-
     using namespace bebone::core;
 
     class VulkanTexture : public IVulkanImage, public IVulkanImageView, public IVulkanSampler, private core::NonCopyable {

@@ -6,13 +6,11 @@
 #include "../gfx_backend.h"
 
 #include "interface/i_vulkan_device.h"
+#include "interface/i_vulkan_image_view.h"
 
 namespace bebone::gfx {
     using namespace bebone::core;
 
-    class VulkanDevice;
-
-    class IVulkanImageView;
     class VulkanRenderPass;
 
     class VulkanFramebuffer : private core::NonCopyable {
