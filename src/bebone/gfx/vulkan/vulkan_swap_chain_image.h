@@ -19,8 +19,8 @@ namespace bebone::gfx {
     struct VulkanSwapChainImage : public IVulkanImage, public IVulkanImageView {
         private:
             IVulkanDevice& device_owner;
-            VkImage image;
 
+            VkImage image;
             std::unique_ptr<VulkanImageView> view;
 
         public:

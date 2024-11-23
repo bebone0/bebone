@@ -1,7 +1,6 @@
 #include "vulkan_depth_image.h"
 
 #include "vulkan_image.h"
-#include "vulkan_device.h"
 
 namespace bebone::gfx {
     VulkanDepthImage::VulkanDepthImage(IVulkanDevice& device, VkExtent3D extent) {

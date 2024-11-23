@@ -19,9 +19,9 @@
 #include "vulkan_framebuffer.h"
 
 namespace bebone::gfx {
-    VulkanDevice::VulkanDevice(VulkanInstance& instance, std::unique_ptr<Window>& window) : instance_owner(instance) {
+    VulkanDevice::VulkanDevice(IVulkanInstance& instance, std::unique_ptr<Window>& window) : instance_owner(instance) {
         auto& vulkan_window = *static_cast<VulkanWindow*>(window.get());
-        vulkan_window.create_window_surface(instance.instance, &surface);
+        vulkan_window.create_window_surface(instance.get_vk_instance(), &surface);
 
         pick_physical_device(instance);
         create_logical_device();
@@ -39,12 +39,12 @@ namespace bebone::gfx {
         vkDestroyDevice(device, nullptr);
 
         LOG_DEBUG("TODO, destroy surface KHR");
-        vkDestroySurfaceKHR(instance_owner.instance, surface, nullptr);
+        vkDestroySurfaceKHR(instance_owner.get_vk_instance(), surface, nullptr);
 
         LOG_TRACE("Destroyed Vulkan device");
     }
 
-    void VulkanDevice::pick_physical_device(VulkanInstance& instance) {
+    void VulkanDevice::pick_physical_device(IVulkanInstance& instance) {
         auto chooser = VulkanDeviceChooser();
 
         physical_device = chooser.get_physical_device(instance, surface);

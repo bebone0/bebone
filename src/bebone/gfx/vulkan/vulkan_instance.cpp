@@ -1,5 +1,4 @@
 #include "vulkan_instance.h"
-#include "vulkan_device.h"
 
 namespace bebone::gfx {
     VulkanInstance::VulkanInstance() {
@@ -120,8 +119,8 @@ namespace bebone::gfx {
         return extensions;
     }
 
-    std::unique_ptr<VulkanDevice> VulkanInstance::create_device(std::unique_ptr<Window>& window) {
-        return std::make_unique<VulkanDevice>(*this, window);;
+    VkInstance VulkanInstance::get_vk_instance() const {
+        return instance;
     }
 }
 

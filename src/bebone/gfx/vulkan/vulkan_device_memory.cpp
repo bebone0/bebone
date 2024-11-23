@@ -1,7 +1,5 @@
 #include "vulkan_device_memory.h"
 
-#include "vulkan_device.h"
-
 #include "vulkan_buffer.h"
 #include "vulkan_image.h"
 

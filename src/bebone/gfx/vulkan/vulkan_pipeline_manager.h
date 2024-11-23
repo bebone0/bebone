@@ -3,7 +3,6 @@
 
 #include "../gfx_backend.h"
 
-#include "vulkan_device.h"
 #include "vulkan_descriptor_pool.h"
 
 namespace bebone::gfx {
@@ -17,7 +16,6 @@ namespace bebone::gfx {
         private:
             IVulkanDevice& device_owner;
 
-        private:
             std::unique_ptr<VulkanDescriptorPool> descriptor_pool;
 
             std::unique_ptr<VulkanDescriptorSetLayout> bindless_descriptor_set_layout;

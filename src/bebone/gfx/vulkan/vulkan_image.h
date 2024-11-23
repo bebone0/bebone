@@ -32,15 +32,17 @@ namespace bebone::gfx {
     class VulkanImage : public IVulkanImage, private core::NonCopyable {
         private:
             IVulkanDevice& device_owner;
+
             VkImage image;
             VkExtent3D extent;
 
         public:
             VulkanImage(IVulkanDevice& device, VkFormat format, VkExtent3D extent, VulkanImageInfo image_info = {});
-            ~VulkanImage();
+            ~VulkanImage() override;
 
             void transition_layout(VkImageLayout old_layout, VkImageLayout new_layout);
 
+            // Vulkan Image
             [[nodiscard]] VkImage get_vk_image() const override;
             [[nodiscard]] VkMemoryRequirements get_memory_requirements() const override;
             [[nodiscard]] VkExtent3D get_extent() const override;

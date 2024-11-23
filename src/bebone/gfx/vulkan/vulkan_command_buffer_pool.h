@@ -5,8 +5,6 @@
 
 #include "../gfx_backend.h"
 
-#include "vulkan_device.h"
-
 #include "interface/i_vulkan_command_buffer_pool.h"
 
 #include "vulkan_command_buffer.h"

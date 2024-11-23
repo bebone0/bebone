@@ -5,8 +5,8 @@
 
 #include "../gfx_backend.h"
 
-#include "vulkan_device.h"
 #include "vulkan_attachment.h"
+#include "interface/i_vulkan_device.h"
 
 namespace bebone::gfx {
     class VulkanRenderPass : private core::NonCopyable {

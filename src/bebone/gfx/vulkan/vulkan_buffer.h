@@ -12,11 +12,6 @@
 namespace bebone::gfx {
     using namespace bebone::core;
 
-    class VulkanDevice;
-
-    class VulkanBuffer;
-    class VulkanDeviceMemory;
-
     const static VkBufferUsageFlags vulkan_buffer_any_use_flag =
         VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT |

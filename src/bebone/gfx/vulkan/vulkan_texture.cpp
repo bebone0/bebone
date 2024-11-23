@@ -1,6 +1,5 @@
-#include "vulkan_texture_tuple.h"
+#include "vulkan_texture.h"
 
-#include "vulkan_device.h"
 #include "vulkan_command_buffer_pool.h"
 #include "vulkan_buffer_memory.h"
 

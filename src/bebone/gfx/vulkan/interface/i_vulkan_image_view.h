@@ -10,7 +10,7 @@ namespace bebone::gfx {
         public:
             virtual ~IVulkanImageView() = default;
 
-            virtual VkImageView get_vk_image_view() const = 0;
+            [[nodiscard]] virtual VkImageView get_vk_image_view() const = 0;
     };
 }
 

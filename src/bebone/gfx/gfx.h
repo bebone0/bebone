@@ -2,7 +2,6 @@
 #define _BEBONE_GFX_GFX_H_
 
 #include "gfx_backend.h"
-#include "begui/begui.h"
 
 #include "vulkan/vulkan_api.h"
 #include "opengl/opengl_api.h"

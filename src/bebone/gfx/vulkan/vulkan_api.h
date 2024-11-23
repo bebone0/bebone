@@ -41,7 +41,7 @@
 
 // Utils class
 #include "vulkan_pipeline_manager.h"
-#include "vulkan_texture_tuple.h"
+#include "vulkan_texture.h"
 
 #include "vulkan_buffer_memory.h"
 

@@ -2,12 +2,12 @@
 
 #include <utility>
 
-#include "vulkan_device.h"
 #include "vulkan_pipeline_layout.h"
 #include "vulkan_descriptor_pool.h"
 #include "vulkan_descriptor_set_layout.h"
 #include "vulkan_descriptor_set_layout_binding.h"
 #include "vulkan_const_range.h"
+#include "vulkan_descriptor_set.h"
 
 namespace bebone::gfx {
     VulkanPipelineManager::VulkanPipelineManager(IVulkanDevice& device) : device_owner(device), bindless_uniforms_index(0), bindless_storage_index(0), bindless_samplers_index(0) {

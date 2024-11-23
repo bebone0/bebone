@@ -9,15 +9,6 @@ struct Vertex {
     Vec2f tex_coords;
 };
 
-const std::vector<Vertex> vertices {
-    {{0.5f,  0.5f, 0.0f},    {1.0f, 1.0f}},
-    {{0.5f, -0.5f, 0.0f},    {1.0f, 0.0f}},
-    {{-0.5f, -0.5f, 0.0f},   {0.0f, 0.0f}},
-    {{-0.5f,  0.5f, 0.0f},   {0.0f, 1.0f}}
-};
-
-const std::vector<u32> indices { 0, 3, 1, 3, 2, 1 };
-
 // Todo make this nicer
 const auto vertex_descriptions = VulkanPipelineVertexInputStateTuple {
     .binding_descriptions = {
@@ -33,21 +24,26 @@ int main() {
     auto window = WindowFactory::create_window("2. Vulkan texture example", 800, 600, Vulkan);
 
     VulkanInstance instance;
-    auto device = instance.create_device(window);
-    auto swap_chain = device->create_swap_chain(window);
+    VulkanDevice device(instance, window);
+    VulkanSwapChain swap_chain(device, window);
 
-    auto pipeline_manager = device->create_pipeline_manager();
+    VulkanPipelineLayout pipeline_layout(device, {}, {});
+    VulkanPipeline pipeline(device, swap_chain.render_pass, pipeline_layout, "vert.glsl", "frag.glsl", { .vertex_input_state = { .vertex_descriptions = vertex_descriptions } });
 
-    auto pipeline = pipeline_manager->create_pipeline(
-        device, swap_chain->render_pass, "vert.glsl", "frag.glsl",
-        { .vertex_input_state = { .vertex_descriptions = vertex_descriptions } }
-    );
+    const std::vector<Vertex> vertices {
+            {{0.5f,  0.5f, 0.0f},    {1.0f, 1.0f}},
+            {{0.5f, -0.5f, 0.0f},    {1.0f, 0.0f}},
+            {{-0.5f, -0.5f, 0.0f},   {0.0f, 0.0f}},
+            {{-0.5f,  0.5f, 0.0f},   {0.0f, 1.0f}}
+    };
 
-    auto vb = device->create_buffer_memory_from(vertices);
-    auto eb = device->create_buffer_memory_from(indices);
+    const std::vector<u32> indices { 0, 3, 1, 3, 2, 1 };
 
-    auto command_buffer_pool = device->create_command_buffer_pool();
-    auto command_buffers = command_buffer_pool->create_command_buffers(device, 3);
+    VulkanBufferMemory vb(device, vertices);
+    VulkanBufferMemory eb(device, indices);
+
+    VulkanCommandBufferPool command_buffer_pool(device);
+    auto command_buffers = command_buffer_pool.create_command_buffers(3);
 
     auto texture = device->create_texture("image.png");
     std::ignore = pipeline_manager->bind_texture(device, texture);

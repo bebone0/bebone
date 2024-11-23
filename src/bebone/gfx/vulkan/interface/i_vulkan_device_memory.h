@@ -10,7 +10,7 @@ namespace bebone::gfx {
         public:
             virtual ~IVulkanDeviceMemory() = default;
 
-            virtual VkDeviceMemory get_vk_device_memory() const = 0;
+            [[nodiscard]] virtual VkDeviceMemory get_vk_device_memory() const = 0;
     };
 }
 

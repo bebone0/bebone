@@ -99,11 +99,11 @@ namespace bebone::gfx {
         return indices;
     }
 
-    VkPhysicalDevice VulkanDeviceChooser::get_physical_device(VulkanInstance& instance, VkSurfaceKHR& surface) {
+    VkPhysicalDevice VulkanDeviceChooser::get_physical_device(IVulkanInstance& instance, VkSurfaceKHR& surface) {
         VkPhysicalDevice physical_device = VK_NULL_HANDLE;
 
         uint32_t device_count = 0;
-        vkEnumeratePhysicalDevices(instance.instance, &device_count, nullptr);
+        vkEnumeratePhysicalDevices(instance.get_vk_instance(), &device_count, nullptr);
         if (device_count == 0) {
             LOG_ERROR("Failed to find GPUs with Vulkan support");
             throw std::runtime_error("failed to find GPUs with Vulkan support!");
@@ -112,7 +112,7 @@ namespace bebone::gfx {
         LOG_INFORMATION("Device count: {}", device_count);
 
         auto devices = std::vector<VkPhysicalDevice>(device_count);
-        vkEnumeratePhysicalDevices(instance.instance, &device_count, devices.data());
+        vkEnumeratePhysicalDevices(instance.get_vk_instance(), &device_count, devices.data());
 
         for(const auto &device : devices) {
             if(is_device_suitable(device, surface)) {

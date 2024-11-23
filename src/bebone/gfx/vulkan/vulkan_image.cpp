@@ -1,6 +1,5 @@
 #include "vulkan_image.h"
 
-#include "vulkan_device.h"
 #include "vulkan_command_buffer_pool.h"
 
 namespace bebone::gfx {

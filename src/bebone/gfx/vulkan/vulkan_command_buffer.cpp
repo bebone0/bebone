@@ -1,6 +1,5 @@
 #include "vulkan_command_buffer.h"
 
-#include "vulkan_device.h"
 #include "vulkan_pipeline_layout.h"
 #include "vulkan_command_buffer_pool.h"
 #include "vulkan_descriptor_set.h"

@@ -1,15 +1,13 @@
 #include "vulkan_image_memory.h"
 
-#include "vulkan_device.h"
-
 #include "vulkan_image.h"
 #include "vulkan_image_view.h"
 #include "vulkan_sampler.h"
 
 namespace bebone::gfx {
     VulkanImageMemory::VulkanImageMemory(
-            unique_ptr<VulkanImage>& image,
-            unique_ptr<VulkanDeviceMemory>& memory
+        unique_ptr<VulkanImage>& image,
+        unique_ptr<VulkanDeviceMemory>& memory
     ) : image(std::move(image)), memory(std::move(memory)) {
 
     }

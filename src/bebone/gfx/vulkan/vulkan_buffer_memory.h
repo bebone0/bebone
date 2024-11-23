@@ -50,7 +50,7 @@ namespace bebone::gfx {
             void copy_to_image(IVulkanImage& image) override;
 
             // Vulkan Device Memory
-            VkDeviceMemory get_vk_device_memory() const override;
+            [[nodiscard]] VkDeviceMemory get_vk_device_memory() const override;
     };
 }
 

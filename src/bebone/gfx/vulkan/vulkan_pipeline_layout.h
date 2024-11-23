@@ -3,7 +3,6 @@
 
 #include "../gfx_backend.h"
 
-#include "vulkan_device.h"
 #include "vulkan_descriptor_pool.h"
 
 namespace bebone::gfx {

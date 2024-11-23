@@ -1,7 +1,5 @@
 #include "vulkan_sampler.h"
 
-#include "vulkan_device.h"
-
 namespace bebone::gfx {
     using namespace bebone::core;
 

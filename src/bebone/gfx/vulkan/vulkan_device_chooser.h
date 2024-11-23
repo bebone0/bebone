@@ -19,7 +19,7 @@ namespace bebone::gfx {
             static VulkanSwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device, VkSurfaceKHR& surface);
             static VulkanQueueFamilyIndices find_queue_families(VkPhysicalDevice device, VkSurfaceKHR& surface);
 
-            VkPhysicalDevice get_physical_device(VulkanInstance& instance, VkSurfaceKHR& surface);
+            VkPhysicalDevice get_physical_device(IVulkanInstance& instance, VkSurfaceKHR& surface);
     };
 }
 

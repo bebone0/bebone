@@ -1,7 +1,5 @@
 #include "vulkan_shader_module.h"
 
-#include "vulkan_device.h"
-
 namespace bebone::gfx {
     VulkanShaderModule::VulkanShaderModule(IVulkanDevice& device, const ShaderCode& code) : device_owner(device), type(code.get_shader_type()) {
         VkShaderModuleCreateInfo create_info{};

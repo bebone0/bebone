@@ -17,7 +17,7 @@
 #include "vulkan_sampler.h"
 #include "vulkan_image_view.h"
 #include "vulkan_pipeline.h"
-#include "vulkan_texture_tuple.h"
+#include "vulkan_texture.h"
 #include "vulkan_descriptor_set.h"
 #include "vulkan_descriptor_set_layout_binding.h"
 #include "vulkan_attachment.h"
@@ -42,7 +42,7 @@ namespace bebone::gfx {
 
     class VulkanDevice : public IVulkanDevice, private core::NonCopyable {
         private:
-            VulkanInstance& instance_owner;
+            IVulkanInstance& instance_owner;
 
             VkDevice device;
             VkSurfaceKHR surface;
@@ -54,14 +54,14 @@ namespace bebone::gfx {
             // Todo, abstract all things below
             VkPhysicalDevice physical_device = VK_NULL_HANDLE;
 
-            void pick_physical_device(VulkanInstance &instance);
+            void pick_physical_device(IVulkanInstance &instance);
             void create_logical_device();
 
             // Todo, maybe this can be optimized
             std::unique_ptr<VulkanCommandBufferPool> command_buffer_pool;
 
         public:
-            VulkanDevice(VulkanInstance& instance, std::unique_ptr<Window>& window);
+            VulkanDevice(IVulkanInstance& instance, std::unique_ptr<Window>& window);
             ~VulkanDevice() override;
 
             //  Todo make this a ICommandBufferPool interface

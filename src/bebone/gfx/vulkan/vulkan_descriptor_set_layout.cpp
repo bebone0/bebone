@@ -1,8 +1,6 @@
 #include "vulkan_descriptor_set_layout.h"
 #include "vulkan_descriptor_set_layout_binding.h"
 
-#include "vulkan_device.h"
-
 namespace bebone::gfx {
     VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(
         IVulkanDevice& device,

@@ -12,7 +12,8 @@
 #include <stdexcept>
 #include <numeric>
 
-#include "vulkan_device.h"
+#include "../window/window.h"
+
 #include "vulkan_render_target.h"
 
 namespace bebone::gfx {
@@ -43,10 +44,10 @@ namespace bebone::gfx {
             static VkPresentModeKHR choose_swap_present_mode(const std::vector<VkPresentModeKHR> &available_present_modes);
             static VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR &capabilities, VkExtent2D window_extent);
 
-            void create_swap_chain(IVulkanDevice& device);
-            void create_sync_objects(IVulkanDevice& device);
+            void create_swap_chain();
+            void create_sync_objects();
 
-            std::vector<std::unique_ptr<VulkanSwapChainImage>> create_swap_chain_images(IVulkanDevice& device, VkFormat image_format);
+            std::vector<std::unique_ptr<VulkanSwapChainImage>> create_swap_chain_images(VkFormat image_format);
 
     public:
             VulkanSwapChain(IVulkanDevice& device, VkExtent2D window_extent);

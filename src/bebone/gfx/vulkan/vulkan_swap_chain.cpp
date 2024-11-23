@@ -6,48 +6,48 @@
 #include "vulkan_command_buffer.h"
 
 namespace bebone::gfx {
-    VulkanSwapChain::VulkanSwapChain(IVulkanDevice& device, VkExtent2D window_extent) : device_owner(device) {
-        auto swap_chain_support = device.get_swap_chain_support();
+    VulkanSwapChain::VulkanSwapChain(IVulkanDevice& device_owner, VkExtent2D window_extent) : device_owner(device_owner) {
+        auto swap_chain_support = device_owner.get_swap_chain_support();
         extent = choose_swap_extent(swap_chain_support.capabilities, window_extent);
 
-        create_swap_chain(device);
+        create_swap_chain();
 
-        auto images = create_swap_chain_images(device, surface_format.format);
+        auto images = create_swap_chain_images(surface_format.format);
 
         // This is default swap chain render pass,
         // but I am not sure is swap chain should manage it own render pass
         render_pass = std::make_unique<VulkanRenderPass>(device_owner, extent, std::vector<VulkanAttachmentDesc> {
             VulkanAttachmentDesc::color2D(extent, { .format = surface_format.format }),
-            VulkanAttachmentDesc::depth2D(extent, { .format = device.find_depth_format() }),
+            VulkanAttachmentDesc::depth2D(extent, { .format = device_owner.find_depth_format() }),
         });
 
         render_target = std::make_unique<VulkanRenderTarget>(device_owner, render_pass, images);
 
-        create_sync_objects(device);
+        create_sync_objects();
 
         LOG_TRACE("Created Vulkan swap chain");
     }
 
-    VulkanSwapChain::VulkanSwapChain(IVulkanDevice& device, std::unique_ptr<Window> &window) : device_owner(device) {
+    VulkanSwapChain::VulkanSwapChain(IVulkanDevice& device_owner, std::unique_ptr<Window> &window) : device_owner(device_owner) {
         auto window_extent = VkExtent2D { static_cast<uint32_t>(window->get_width()), static_cast<uint32_t>(window->get_height()) };
 
-        auto swap_chain_support = device.get_swap_chain_support();
+        auto swap_chain_support = device_owner.get_swap_chain_support();
         extent = choose_swap_extent(swap_chain_support.capabilities, window_extent);
 
-        create_swap_chain(device);
+        create_swap_chain();
 
-        auto images = create_swap_chain_images(device, surface_format.format);
+        auto images = create_swap_chain_images(surface_format.format);
 
         // This is default swap chain render pass,
         // but I am not sure is swap chain should manage it own render pass
         render_pass = std::make_unique<VulkanRenderPass>(device_owner, extent, std::vector<VulkanAttachmentDesc> {
             VulkanAttachmentDesc::color2D(extent, { .format = surface_format.format }),
-            VulkanAttachmentDesc::depth2D(extent, { .format = device.find_depth_format() }),
+            VulkanAttachmentDesc::depth2D(extent, { .format = device_owner.find_depth_format() }),
         });
 
         render_target = std::make_unique<VulkanRenderTarget>(device_owner, render_pass, images);
 
-        create_sync_objects(device);
+        create_sync_objects();
 
         LOG_TRACE("Created Vulkan swap chain");
     }
@@ -147,7 +147,7 @@ namespace bebone::gfx {
         return { result };
     }
 
-    std::vector<std::unique_ptr<VulkanSwapChainImage>> VulkanSwapChain::create_swap_chain_images(IVulkanDevice& device, VkFormat image_format) {
+    std::vector<std::unique_ptr<VulkanSwapChainImage>> VulkanSwapChain::create_swap_chain_images(VkFormat image_format) {
         uint32_t image_count;
 
         vkGetSwapchainImagesKHR(device_owner.get_vk_device(), swap_chain, &image_count, nullptr);
@@ -160,13 +160,13 @@ namespace bebone::gfx {
         vkGetSwapchainImagesKHR(device_owner.get_vk_device(), swap_chain, &image_count, images.data());
 
         for(auto& vk_image : images)
-            out.push_back(std::make_unique<VulkanSwapChainImage>(device, vk_image, image_format));
+            out.push_back(std::make_unique<VulkanSwapChainImage>(device_owner, vk_image, image_format));
 
         return out;
     }
 
-    void VulkanSwapChain::create_swap_chain(IVulkanDevice& device) {
-        auto swap_chain_support = device.get_swap_chain_support();
+    void VulkanSwapChain::create_swap_chain() {
+        auto swap_chain_support = device_owner.get_swap_chain_support();
 
         surface_format = choose_swap_surface_format(swap_chain_support.formats);
         present_mode = choose_swap_present_mode(swap_chain_support.present_modes);
@@ -180,7 +180,7 @@ namespace bebone::gfx {
 
         VkSwapchainCreateInfoKHR create_info = {};
         create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        create_info.surface = device.get_surface();
+        create_info.surface = device_owner.get_surface();
         create_info.minImageCount = image_count;
         create_info.imageFormat = surface_format.format;
         create_info.imageColorSpace = surface_format.colorSpace;
@@ -188,7 +188,7 @@ namespace bebone::gfx {
         create_info.imageArrayLayers = 1;
         create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        VulkanQueueFamilyIndices indices = device.find_physical_queue_families();
+        VulkanQueueFamilyIndices indices = device_owner.find_physical_queue_families();
         uint32_t queue_family_indices[] = {indices.graphics_family, indices.present_family};
 
         if (indices.graphics_family != indices.present_family) {
@@ -213,7 +213,7 @@ namespace bebone::gfx {
         }
     }
 
-    void VulkanSwapChain::create_sync_objects(IVulkanDevice& device) {
+    void VulkanSwapChain::create_sync_objects() {
         image_available_semaphores.resize(image_count);
         render_finished_semaphores.resize(image_count);
         in_flight_fences.resize(image_count);

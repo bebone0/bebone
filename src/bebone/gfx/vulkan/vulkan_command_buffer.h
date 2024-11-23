@@ -9,6 +9,8 @@
 #include "vulkan_swap_chain.h"
 #include "vulkan_pipeline.h"
 
+#include "interface/i_vulkan_buffer.h"
+
 namespace bebone::gfx {
     using namespace bebone::core;
 
@@ -35,9 +37,9 @@ namespace bebone::gfx {
             Self& begin_render_pass(const VulkanSwapChain& swap_chain);
 
             Self& begin_render_pass(
-                    const std::unique_ptr<VulkanRenderTarget>& render_target,
-                    const std::unique_ptr<VulkanRenderPass>& render_pass,
-                    const size_t& frame);
+                const std::unique_ptr<VulkanRenderTarget>& render_target,
+                const std::unique_ptr<VulkanRenderPass>& render_pass,
+                const size_t& frame);
 
             Self& begin_render_pass(
                 const std::unique_ptr<VulkanFramebuffer>& framebuffer,
@@ -57,28 +59,28 @@ namespace bebone::gfx {
             Self& bind_index_buffer(IVulkanBuffer& buffer);
 
             Self& bind_descriptor_set(
-                    const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
-                    const std::unique_ptr<VulkanDescriptorSet>& descriptor_set);
+                const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+                const std::unique_ptr<VulkanDescriptorSet>& descriptor_set);
 
             Self& bind_descriptor_set(
-                    const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
-                    const std::vector<std::unique_ptr<VulkanDescriptorSet>>& descriptor_sets,
-                    const size_t& frame);
+                const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+                const std::vector<std::unique_ptr<VulkanDescriptorSet>>& descriptor_sets,
+                const size_t& frame);
 
             Self& bind_descriptor_sets(
-                    const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
-                    const std::vector<std::unique_ptr<VulkanDescriptorSet>>& descriptor_sets);
+                const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+                const std::vector<std::unique_ptr<VulkanDescriptorSet>>& descriptor_sets);
 
             Self& push_constant(
-                    const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
-                    const u32& size,
-                    const void* ptr);
+                const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+                const u32& size,
+                const void* ptr);
 
             Self& push_constant(
-                    const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
-                    const uint32_t& size,
-                    const size_t& offset,
-                    const void* ptr);
+                const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+                const uint32_t& size,
+                const size_t& offset,
+                const void* ptr);
 
             Self& draw(const size_t& vertex_count);
             Self& draw_indexed(const size_t& vertex_count);

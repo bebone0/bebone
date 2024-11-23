@@ -7,7 +7,6 @@ namespace bebone::gfx {
     using namespace bebone::core;
 
     class IVulkanCommandBuffer {
-        private:
         public:
             virtual ~IVulkanCommandBuffer() = default;
     };

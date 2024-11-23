@@ -6,9 +6,10 @@
 #include "../gfx_backend.h"
 
 #include "vulkan_render_pass.h"
-#include "vulkan_device.h"
 #include "vulkan_image.h"
 #include "vulkan_framebuffer.h"
+#include "vulkan_swap_chain_image.h"
+#include "vulkan_texture.h"
 
 namespace bebone::gfx {
     class VulkanImage;

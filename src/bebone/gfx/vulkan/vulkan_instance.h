@@ -2,22 +2,22 @@
 #define _BEBONE_GFX_VULKAN_INSTANCE_H_
 
 #include <memory>
+#include <unordered_set>
 
 #include "../gfx_backend.h"
 #include "../window/vulkan_window.h"
 #include "vulkan_debug_messenger.h"
 
+#include "interface/i_vulkan_instance.h"
+
 namespace bebone::gfx {
     class VulkanDevice;
 
-    class VulkanInstance : private core::NonCopyable {
-        public:
+    class VulkanInstance : public IVulkanInstance, private core::NonCopyable {
+        private:
             VkInstance instance;
 
-        private:
-
             std::unique_ptr<VulkanDebugMessenger> debug_messenger;
-            std::vector<std::unique_ptr<VulkanDevice>> child_devices;
 
             bool check_validation_layer_support();
             static void has_gflw_required_instance_extensions();
@@ -27,10 +27,12 @@ namespace bebone::gfx {
 
         public:
             VulkanInstance();
-            ~VulkanInstance();
+            ~VulkanInstance() override;
 
-            std::unique_ptr<VulkanDevice> create_device(std::unique_ptr<Window>& window);
             const std::vector<const char *> validation_layers = { "VK_LAYER_KHRONOS_validation" };
+
+            // Vulkan Instance
+            [[nodiscard]] VkInstance get_vk_instance() const override;
     };
 }
 

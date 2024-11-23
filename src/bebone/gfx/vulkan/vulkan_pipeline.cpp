@@ -1,6 +1,5 @@
 #include "vulkan_pipeline.h"
 
-#include "vulkan_device.h"
 #include "vulkan_swap_chain.h"
 #include "vulkan_pipeline_layout.h"
 
