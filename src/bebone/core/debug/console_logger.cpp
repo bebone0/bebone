@@ -23,8 +23,8 @@ namespace bebone::core {
         time_stream << std::put_time(&tm, "%H:%M:%S");
         auto formatted_time = time_stream.str();
 
-        std::stringstream ss;
-        ss << UnixConsoleColors::Gray << "[" << formatted_time << " " << log_level_color << log_level_str << UnixConsoleColors::Gray << "] ";
+        std::stringstream prefix;
+        prefix << UnixConsoleColors::Gray << "[" << formatted_time << " " << log_level_color << log_level_str << UnixConsoleColors::Gray << "] ";
 
         stream << prefix.str() << UnixConsoleColors::Default << format << std::endl;
     }
@@ -46,8 +46,8 @@ namespace bebone::core {
         time_stream << std::put_time(&tm, "%H:%M:%S");
         auto formatted_time = time_stream.str();
 
-        std::stringstream ss;
-        ss << UnixConsoleColors::Gray << "[" << formatted_time << " " << log_level_color << log_level_str << UnixConsoleColors::Gray << "] ";
+        std::stringstream prefix;
+        prefix << UnixConsoleColors::Gray << "[" << formatted_time << " " << log_level_color << log_level_str << UnixConsoleColors::Gray << "] ";
 
         stream << prefix.str() << UnixConsoleColors::Default << std::vformat(format, args) << std::endl;
     }
