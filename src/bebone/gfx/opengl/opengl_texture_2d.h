@@ -1,5 +1,5 @@
-#ifndef _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_2D_H_
-#define _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_2D_H_
+#ifndef _BEBONE_GFX_OPENGL_TEXTURE_2D_H_
+#define _BEBONE_GFX_OPENGL_TEXTURE_2D_H_
 
 #include "../../assets/image/image.h"
 

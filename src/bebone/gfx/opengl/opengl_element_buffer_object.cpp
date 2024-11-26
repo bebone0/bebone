@@ -2,6 +2,8 @@
 
 namespace bebone::gfx {
     GLElementBufferObject::GLElementBufferObject(const void* indices, const GLsizeiptr& size, const GLenum& usage) : GLBufferObject() {
+        glGenBuffers(1, &id);
+        
         bind();
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, usage);
     }
