@@ -2,34 +2,30 @@
 #include "world.h"
 
 namespace bexel {
-    Chunk::Chunk(const Vec3f& pos) : m_mesh(nullptr) {
-        m_transform.translation = pos;
-        m_transform.rotation = Mat4f::identity();
-        m_transform.scale = Vec3f::one;
+    Chunk::Chunk(const Vec3f& pos) : mesh(nullptr) {
+        transform.translation = pos;
+        transform.rotation = Mat4f::identity();
+        transform.scale = Vec3f::one;
     }
 
     Chunk::~Chunk() {
         for(i32 x = 0; x < CHUNK_SIZE_X; ++x) {
             for(i32 z = 0; z < CHUNK_SIZE_Z; ++z) {
                 for(i32 y = 0; y < CHUNK_SIZE_Y; ++y) {
-                    delete m_voxels[x][y][z];
+                    delete voxels[x][y][z];
                 }
             }
         }
     }
 
-    void Chunk::generate_chunk(unique_ptr<WorldGenerator>& worldGenerator) {
-        BEBONE_PROFILE_RECORD(BEXEL_CHUNK_GENERATE_CHUNK)
-
+    void Chunk::generate_chunk(unique_ptr<WorldGenerator>& world_generator) {
         for(i32 x = 0; x < CHUNK_SIZE_X; ++x) {
             for(i32 z = 0; z < CHUNK_SIZE_Z; ++z) {
                 for(i32 y = 0; y < CHUNK_SIZE_Y; ++y) {
-                    m_voxels[x][y][z] = worldGenerator->create_voxel_at(*this, Vec3i(x, y, z));
+                    voxels[x][y][z] = world_generator->create_voxel_at(*this, Vec3i(x, y, z));
                 }
             }
         }
-
-        BEBONE_PROFILE_STOP(BEXEL_CHUNK_GENERATE_CHUNK)
     }
 
     TileBlock* Chunk::get_voxel(const i32& x, const i32& y, const i32& z) {
@@ -37,17 +33,15 @@ namespace bexel {
         if(y < 0 || y >= CHUNK_SIZE_Y) return nullptr;
         if(z < 0 || z >= CHUNK_SIZE_Z) return nullptr;
 
-        return m_voxels[x][y][z];
+        return voxels[x][y][z];
     }
 
     const Vec3f& Chunk::get_pos() const {
-        return m_transform.translation;
+        return transform.translation;
     }
 
     void Chunk::generate_mesh(World& world) {
-        BEBONE_PROFILE_RECORD(BEXEL_CHUNK_GENERATE_MESH)
-
-        MeshBuilder meshBuilder;
+        MeshBuilder mesh_builder;
 
         for(i32 x = 0; x < CHUNK_SIZE_X; ++x) {
             for(i32 z = 0; z < CHUNK_SIZE_Z; ++z) {
@@ -55,28 +49,22 @@ namespace bexel {
                     auto voxel = get_voxel(x, y, z);
 
                     if(voxel != nullptr)
-                        voxel->append_mesh(meshBuilder, world, *this);
+                        voxel->append_mesh(mesh_builder, world, *this);
                 }
             }
         }
 
-        m_mesh = meshBuilder.build();
-
-        BEBONE_PROFILE_STOP(BEXEL_CHUNK_GENERATE_MESH)
+        mesh = mesh_builder.build();
     }
 
     const Transform& Chunk::get_transform() const {
-        return m_transform;
+        return transform;
     }
 
     void Chunk::render(unique_ptr<GLShaderProgram>& shader) {
-        BEBONE_PROFILE_RECORD(BEXEL_CHUNK_RENDER)
+        shader->set_uniform("transform", transform.calc_matrix());
 
-        shader->set_uniform("transform", m_transform.calc_matrix());
-
-        if(m_mesh != nullptr)
-            m_mesh->render();
-
-        BEBONE_PROFILE_STOP(BEXEL_CHUNK_RENDER)
+        if(mesh != nullptr)
+            mesh->render();
     }
 }

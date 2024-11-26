@@ -1,21 +1,26 @@
-#ifndef _BEBONE_GFX_VULKAN_VULKAN_DESCRIPTOR_SET_LAYOUT_H_
-#define _BEBONE_GFX_VULKAN_VULKAN_DESCRIPTOR_SET_LAYOUT_H_
+#ifndef _BEBONE_GFX_VULKAN_DESCRIPTOR_SET_LAYOUT_H_
+#define _BEBONE_GFX_VULKAN_DESCRIPTOR_SET_LAYOUT_H_
 
 #include "../gfx_backend.h"
 
 #include "vulkan_descriptor_pool.h"
 
-namespace bebone::gfx::vulkan {
-    class VulkanDevice;
+namespace bebone::gfx {
     class VulkanDescriptorSetLayoutBinding;
 
-    class VulkanDescriptorSetLayout : public VulkanWrapper<VkDescriptorSetLayout>, private core::NonCopyable {
+    class VulkanDescriptorSetLayout : private core::NonCopyable {
         public:
-            VulkanDescriptorSetLayout(
-                VulkanDevice& device,
-                const std::vector<VulkanDescriptorSetLayoutBinding>& bindings);
+            VkDescriptorSetLayout descriptor_set_layout;
 
-            void destroy(VulkanDevice& device) override;
+        private:
+            IVulkanDevice& device_owner;
+
+        public:
+            VulkanDescriptorSetLayout( // Todo move to private
+                IVulkanDevice& device,
+                const std::vector<VulkanDescriptorSetLayoutBinding>& all_bindings);
+
+            ~VulkanDescriptorSetLayout();
     };
 }
 

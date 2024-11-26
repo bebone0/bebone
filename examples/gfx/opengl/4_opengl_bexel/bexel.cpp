@@ -1,85 +1,60 @@
 #include "bexel.h"
 
 namespace bexel {
-    Bexel::Bexel() : m_window(nullptr), m_shader(nullptr), m_world(nullptr) {
+    Bexel::Bexel() : window(nullptr), shader(nullptr), world(nullptr) {
 
     }
 
     void Bexel::init() {
-        BEBONE_PROFILE_RECORD(BEXEL_INIT)
-
-        GLFWContext::init();
-
-        m_window = WindowFactory::create_window("4. Opengl Bexel example", GAME_WIDTH, GAME_HEIGHT, GfxAPI::OPENGL, {
-            .enableResize = true
+        window = WindowFactory::create_window("4. Opengl Bexel example", game_width, game_height, OpenGL, {
+            .enable_resize = true
         });
 
         GLContext::load_opengl();
         glfwSwapInterval(0);
-
-        BEBONE_PROFILE_STOP(BEXEL_INIT)
     }
 
     void Bexel::load() {
-        BEBONE_PROFILE_RECORD(BEXEL_LOAD)
+        const auto shader_flags = EnableUniforms;
 
-        const auto shaderFlags = ENABLE_UNIFORMS;
+        auto vertex_shader = GLShaderFactory::create_shader("assets/vertex.glsl", ShaderType::VertexShader, shader_flags);
+        auto fragment_shader = GLShaderFactory::create_shader("assets/fragment.glsl", ShaderType::FragmentShader, shader_flags);
 
-        auto vertexShader = GLShaderFactory::create_shader("assets/vertex.glsl", ShaderTypes::VERTEX_SHADER, shaderFlags);
-        auto fragmentShader = GLShaderFactory::create_shader("assets/fragment.glsl", ShaderTypes::FRAGMENT_SHADER, shaderFlags);
+        shader = make_unique<GLShaderProgram>(vertex_shader, fragment_shader);
 
-        m_shader = make_unique<GLShaderProgram>(vertexShader, fragmentShader);
+        camera = make_unique<Camera>(Vec3f(0.0, -24.0f, 0.0f), 12);
+        world = make_unique<World>();
 
-        m_camera = make_unique<Camera>(Vec3f(0.0, -24.0f, 0.0f), 12);
-        m_world = make_unique<World>();
-
-        m_texture = make_unique<GLTexture2D>("assets/texture.png");
-
-        BEBONE_PROFILE_STOP(BEXEL_LOAD)
+        texture = make_unique<GLTexture2D>("assets/texture.png");
     }
 
     void Bexel::run() {
-        BEBONE_PROFILE_RECORD(BEXEL_RUN)
+        shader->set_uniform("inTexture", 0);
 
-        GLContext::enable(GL_DEPTH_TEST);
-        GLContext::enable(GL_CULL_FACE);
-        GLContext::cull_face(GL_BACK);
-        GLContext::front_face(GL_CW);
-
-        m_shader->set_uniform("inTexture", 0);
-
-        while (!m_window->closing()) {
-            BEBONE_PROFILE_RECORD(BEXEL_UPDATE_LOOP)
-
-            GLContext::set_viewport(0, 0, m_window->get_width(), m_window->get_height());
+        while (!window->closing()) {
+            GLContext::set_viewport(0, 0, window->get_width(), window->get_height());
             GLContext::clear_color(0.47f, 0.65f, 1.0f, 1.0f);
             GLContext::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            m_camera->update(m_window);
-            m_world->update(m_camera);
+            camera->update(window);
+            world->update(camera);
 
-            m_shader->enable();
+            shader->enable();
 
-            m_texture->bind();
+            texture->bind();
 
-            m_camera->bind(m_shader);
-            m_world->render(m_shader);
+            camera->bind(shader);
+            world->render(shader);
 
-            GLFWContext::swap_buffers(*m_window);
-            GLFWContext::poll_events();
-
-            BEBONE_PROFILE_STOP(BEXEL_UPDATE_LOOP)
+            GLFWContext::swap_buffers(*window);
+            window->pull_events();
         }
-
-        BEBONE_PROFILE_STOP(BEXEL_RUN)
     }
 
     void Bexel::unload() {
-        m_camera = nullptr;
-        m_world = nullptr;
+        camera = nullptr;
+        world = nullptr;
 
-        m_shader->destroy();
-
-        GLFWContext::terminate();
+        shader->destroy();
     }
 }

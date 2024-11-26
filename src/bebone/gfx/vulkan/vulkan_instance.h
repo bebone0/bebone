@@ -1,48 +1,36 @@
-#ifndef _BEBONE_GFX_VULKAN_VULKAN_INSTANCE_H_
-#define _BEBONE_GFX_VULKAN_VULKAN_INSTANCE_H_
+#ifndef _BEBONE_GFX_VULKAN_INSTANCE_H_
+#define _BEBONE_GFX_VULKAN_INSTANCE_H_
 
 #include <memory>
+#include <unordered_set>
 
 #include "../gfx_backend.h"
 #include "../window/vulkan_window.h"
 #include "vulkan_debug_messenger.h"
 
-namespace bebone::gfx::vulkan {
-    class VulkanDevice;
+#include "interface/i_vulkan_instance.h"
 
-    class VulkanInstance : private core::NonCopyable {
+namespace bebone::gfx {
+    class VulkanInstance : public IVulkanInstance, private core::NonCopyable {
         private:
             VkInstance instance;
 
-            std::unique_ptr<VulkanDebugMessenger> debugMessenger;
+            std::unique_ptr<VulkanDebugMessenger> debug_messenger;
 
-            bool checkValidationLayerSupport();
-            static void hasGflwRequiredInstanceExtensions();
-            static std::vector<const char *> getRequiredExtensions();
+            bool check_validation_layer_support();
+            static void has_gflw_required_instance_extensions();
+            static std::vector<const char *> get_required_extensions();
+
+            bool const static enable_validation_layers = true;
 
         public:
-            bool const static enableValidationLayers = true;
-
-            void createInstance();
-
-            VkInstance& get_instance();
-
             VulkanInstance();
+            ~VulkanInstance() override;
 
-            std::shared_ptr<VulkanDevice> create_device(std::shared_ptr<Window>& window);
+            const std::vector<const char *> validation_layers = { "VK_LAYER_KHRONOS_validation" };
 
-            const std::vector<const char *> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-
-            static std::shared_ptr<VulkanInstance> create_instance() {
-                return std::make_shared<VulkanInstance>();
-            }
-
-            void destroy() {
-                if(enableValidationLayers)
-                    debugMessenger = nullptr;
-
-                vkDestroyInstance(instance, nullptr);
-            }
+            // Vulkan Instance
+            [[nodiscard]] VkInstance get_vk_instance() const override;
     };
 }
 

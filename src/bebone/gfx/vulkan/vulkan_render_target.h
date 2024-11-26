@@ -1,33 +1,37 @@
-#ifndef _BEBONE_GFX_VULKAN_VULKAN_RENDER_TARGET_H_
-#define _BEBONE_GFX_VULKAN_VULKAN_RENDER_TARGET_H_
+#ifndef _BEBONE_GFX_VULKAN_RENDER_TARGET_H_
+#define _BEBONE_GFX_VULKAN_RENDER_TARGET_H_
 
 #include <array>
 
 #include "../gfx_backend.h"
 
 #include "vulkan_render_pass.h"
-#include "vulkan_device.h"
 #include "vulkan_image.h"
 #include "vulkan_framebuffer.h"
+#include "vulkan_swap_chain_image.h"
+#include "vulkan_texture.h"
 
-namespace bebone::gfx::vulkan {
+namespace bebone::gfx {
     class VulkanImage;
 
     class VulkanRenderTarget {
         public:
-            std::shared_ptr<VulkanRenderPass> renderPass;
+            // Vector of all FIFO attachments
+            vector<vector<unique_ptr<IVulkanImageView>>> color_attachments;
+            vector<unique_ptr<IVulkanImageView>> depth_attachments;
+            vector<unique_ptr<VulkanFramebuffer>> framebuffers;
 
-            std::vector<std::shared_ptr<VulkanFramebuffer>> swapChainFramebuffers;
-            std::vector<VulkanDepthImageTuple> depthImages;
-            std::vector<VulkanSwapChainImageTuple> swapChainImages;
+            // This is still just a swap chain render target constructor
+            VulkanRenderTarget(
+                IVulkanDevice& device,
+                std::unique_ptr<VulkanRenderPass>& render_pass);
 
             VulkanRenderTarget(
-                VulkanDevice& device,
-                std::vector<VulkanSwapChainImageTuple>& swapChainImages,
-                VkFormat imageFormat,
-                VkExtent2D extent);
+                IVulkanDevice& device,
+                std::unique_ptr<VulkanRenderPass>& render_pass,
+                std::vector<std::unique_ptr<VulkanSwapChainImage>>& images);
 
-            void destroy(VulkanDevice& device);
+            ~VulkanRenderTarget();
     };
 }
 

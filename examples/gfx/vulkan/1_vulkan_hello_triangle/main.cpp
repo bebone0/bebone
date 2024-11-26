@@ -2,93 +2,60 @@
 
 using namespace bebone::core;
 using namespace bebone::gfx;
-using namespace bebone::gfx::vulkan;
-
-struct Vertex {
-    Vec3f pos;
-    Vec3f color;
-};
-
-const std::vector<Vertex> vertices = {
-    {{0.5f, 0.5f, 0.0f},  {1.0f, 0.0f, 0.0f}},
-    {{0.0f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-};
 
 // Todo make this nicer
-const auto vertexDescriptions = VulkanPipelineVertexInputStateTuple {
-    .bindingDescriptions = {
-        { 0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX }
+const auto vertex_descriptions = VulkanPipelineVertexInputStateTuple {
+    .binding_descriptions = {
+        { 0, sizeof(Vec3f), VK_VERTEX_INPUT_RATE_VERTEX }
     },
-    .attributeDescriptions = {
-        { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, pos) },
-        { 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) },
+    .attribute_descriptions = {
+        { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 }
     }
 };
 
-const std::vector<int> indices = { 0, 1, 2 };
-
 int main() {
-    GLFWContext::init();
+    auto window = WindowFactory::create_window("1. Vulkan hello triangle example", 800, 600, Vulkan);
 
-    auto window = WindowFactory::create_window("1. Vulkan hello window example", 800, 600, GfxAPI::VULKAN);
+    VulkanInstance instance;
+    VulkanDevice device(instance, window);
+    VulkanSwapChain swap_chain(device, window);
 
-    auto instance = VulkanInstance::create_instance();
-    auto device = instance->create_device(window);
-    auto swapChain = device->create_swap_chain(window);
+    VulkanPipelineLayout pipeline_layout(device, {}, {});
+    VulkanPipeline pipeline(device, swap_chain.render_pass, pipeline_layout, "vert.glsl", "frag.glsl", { .vertex_input_state = { .vertex_descriptions = vertex_descriptions } });
 
-    auto vertShaderModule = device->create_shader_module("vert.glsl", ShaderTypes::VERTEX_SHADER);
-    auto fragShaderModule = device->create_shader_module("frag.glsl", ShaderTypes::FRAGMENT_SHADER);
-    auto pipelineLayout = device->create_pipeline_layout({}, {});
-    auto pipeline = device->create_pipeline(swapChain, pipelineLayout, { vertShaderModule, fragShaderModule }, {
-        .pVertexInputState = { .vertexDescriptions = vertexDescriptions }
-    });
+    const std::vector<Vec3f> vertices = { {-0.5f, -0.5f, 0.0f}, {0.5f, -0.5f, 0.0f}, {0.0f,  0.5f, 0.0f} };
+    const std::vector<u32> indices = { 0, 1, 2, };
 
-    auto vertexBuffer = device->create_buffer_memory(sizeof(Vertex) * vertices.size());
-    auto indexBuffer = device->create_buffer_memory(sizeof(u32) * indices.size());
-    vertexBuffer.memory->upload_data(device, vertices.data(), sizeof(Vertex) * vertices.size());
-    indexBuffer.memory->upload_data(device, indices.data(), sizeof(u32) * indices.size());
+    VulkanBufferMemory vb(device, vertices);
+    VulkanBufferMemory eb(device, indices);
 
-    auto commandBufferPool = device->create_command_buffer_pool();
-    auto commandBuffers = commandBufferPool->create_command_buffers(device, 3);
+    VulkanCommandBufferPool command_buffer_pool(device);
+    auto command_buffers = command_buffer_pool.create_command_buffers(3);
 
     while (!window->closing()) {
-        GLFWContext::poll_events();
+        window->pull_events();
 
         uint32_t frame;
-        auto result = swapChain->acquire_next_image(device, &frame);
-
-        if(!result.is_ok())
+        if(!swap_chain.acquire_next_image(&frame).is_ok())
             continue;
 
-        auto& cmd = commandBuffers[frame];
+        unique_ptr<VulkanCommandBuffer>& cmd = command_buffers[frame];
 
-        cmd->begin_record()
-            .begin_render_pass(swapChain, frame)
-            .set_viewport(0, 0, window->get_width(), window->get_height())
-            .bind_pipeline(pipeline)
-            .bind_vertex_buffer(vertexBuffer.buffer)
-            .bind_index_buffer(indexBuffer.buffer)
-            .draw_indexed(indices.size())
-            .end_render_pass()
-            .end_record();
+        cmd->begin_record();
 
-        result = swapChain->submit_command_buffers(device, cmd, &frame);
+        cmd->begin_render_pass(swap_chain);
+            cmd->set_viewport(window);
+            cmd->bind_pipeline(pipeline);
+            cmd->bind_vertex_buffer(vb)
+                .bind_index_buffer(eb)
+                .draw_indexed(indices.size());
+        cmd->end_render_pass();
 
-        if(!result.is_ok()) // Todo check if window is resized
+        cmd->end_record();
+
+        if(!swap_chain.submit_present_command_buffers(*cmd, &frame).is_ok()) // Todo check if window is resized
             continue;
     }
-
-    device->wait_idle();
-
-    device->destroy_all(commandBuffers); // Todo \/ lets make all tuples also destroyable
-    device->destroy_all(vertexBuffer.buffer, indexBuffer.buffer, vertexBuffer.memory, indexBuffer.memory,commandBufferPool);
-    device->destroy_all(vertShaderModule,fragShaderModule,pipelineLayout,pipeline, swapChain);
-
-    device->destroy();
-    instance->destroy();
-
-    GLFWContext::terminate();
 
     return 0;
 }

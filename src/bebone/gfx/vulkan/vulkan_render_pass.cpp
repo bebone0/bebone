@@ -1,41 +1,49 @@
 #include "vulkan_render_pass.h"
 
-namespace bebone::gfx::vulkan {
-    VulkanRenderPass::VulkanRenderPass(VulkanDevice& device, VkFormat colorAttachmentImageFormat) {
-        VkAttachmentDescription depthAttachment{};
-        depthAttachment.format = device.find_depth_format();
-        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+namespace bebone::gfx {
+    VulkanRenderPass::VulkanRenderPass(
+        IVulkanDevice& device,
+        VkExtent2D extent,
+        const std::vector<VulkanAttachmentDesc>& attachments
+    ) : device_owner(device), attachments(attachments), depth_attachment_index(0), has_depth_attachment_flag(false), color_attachment_count(0), extent(extent) {
+        auto descriptions = std::vector<VkAttachmentDescription> {};
+        descriptions.reserve(attachments.size());
 
-        VkAttachmentReference depthAttachmentRef{};
-        depthAttachmentRef.attachment = 1;
-        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        for(const auto& attachment : attachments)
+            descriptions.push_back(attachment.description);
 
-        VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = colorAttachmentImageFormat;
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        auto color_attachments_ref = std::vector<VkAttachmentReference> {};
+        auto depth_attachment_ref = VkAttachmentReference {}; // Only one depth attachment
 
-        VkAttachmentReference colorAttachmentRef = {};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        for(size_t i = 0; i < attachments.size(); ++i) {
+            const auto& attachment = attachments[i];
 
-        VkSubpassDescription subpass = {};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
-        subpass.pDepthStencilAttachment = &depthAttachmentRef;
+            // Todo, only one depth attachment is allowed
+            if(attachment.type == Depth) {
+                depth_attachment_ref.attachment = i;
+                depth_attachment_ref.layout = attachment.layout;
 
+                depth_attachment_index = i;
+                has_depth_attachment_flag = true;
+            } else if(attachment.type == Color)
+                color_attachments_ref.push_back(VkAttachmentReference{ static_cast<uint32_t>(i), attachment.layout });
+        }
+
+        // We save color attachment count
+        color_attachment_count = color_attachments_ref.size();
+
+        // Main subpass
+        auto subpass = VkSubpassDescription {};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS; // Todo
+        subpass.colorAttachmentCount = color_attachments_ref.size();
+        subpass.pColorAttachments = color_attachments_ref.data();
+
+        if(has_depth_attachment_flag)
+            subpass.pDepthStencilAttachment = &depth_attachment_ref;
+        else
+            subpass.pDepthStencilAttachment = nullptr;
+
+        // and it dependencies
         VkSubpassDependency dependency = {};
         dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
         dependency.srcAccessMask = 0;
@@ -44,22 +52,47 @@ namespace bebone::gfx::vulkan {
         dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-        std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
-        VkRenderPassCreateInfo renderPassInfo = {};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-        renderPassInfo.pAttachments = attachments.data();
-        renderPassInfo.subpassCount = 1;
-        renderPassInfo.pSubpasses = &subpass;
-        renderPassInfo.dependencyCount = 1;
-        renderPassInfo.pDependencies = &dependency;
+        VkRenderPassCreateInfo render_pass_info = {};
+        render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        render_pass_info.attachmentCount = static_cast<uint32_t>(descriptions.size());
+        render_pass_info.pAttachments = descriptions.data();
 
-        if (vkCreateRenderPass(device.device(), &renderPassInfo, nullptr, &backend) != VK_SUCCESS) {
+        render_pass_info.subpassCount = 1;
+        render_pass_info.pSubpasses = &subpass;
+
+        render_pass_info.dependencyCount = 1;
+        render_pass_info.pDependencies = &dependency;
+
+        if(vkCreateRenderPass(device_owner.get_vk_device(), &render_pass_info, nullptr, &render_pass) != VK_SUCCESS) {
+            LOG_ERROR("Failed to create render pass");
             throw std::runtime_error("failed to create render pass!");
         }
+
+        LOG_TRACE("Created Vulkan render pass");
     }
 
-    void VulkanRenderPass::destroy(VulkanDevice& device) {
-        vkDestroyRenderPass(device.device(), backend, nullptr);
+    VulkanRenderPass::~VulkanRenderPass() {
+        vkDestroyRenderPass(device_owner.get_vk_device(), render_pass, nullptr);
+
+        LOG_TRACE("Destroyed Vulkan render pass");
+    }
+
+    std::optional<VulkanAttachmentDesc> VulkanRenderPass::get_depth_attachment() const {
+        if(!has_depth_attachment_flag)
+            return std::nullopt;
+
+        return attachments[depth_attachment_index];
+    }
+
+    const size_t& VulkanRenderPass::get_color_attachments_count() const {
+        return color_attachment_count;
+    }
+
+    const vector<VulkanAttachmentDesc>& VulkanRenderPass::get_attachments() const {
+        return attachments;
+    }
+
+    const VkExtent2D& VulkanRenderPass::get_extent() const {
+        return extent;
     }
 }

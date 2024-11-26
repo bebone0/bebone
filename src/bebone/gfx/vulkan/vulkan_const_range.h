@@ -1,18 +1,17 @@
-#ifndef _BEBONE_GFX_VULKAN_VULKAN_CONST_RANGE_H_
-#define _BEBONE_GFX_VULKAN_VULKAN_CONST_RANGE_H_
+#ifndef _BEBONE_GFX_VULKAN_CONST_RANGE_H_
+#define _BEBONE_GFX_VULKAN_CONST_RANGE_H_
 
 #include "../gfx_backend.h"
 
-namespace bebone::gfx::vulkan {
+namespace bebone::gfx {
     using namespace bebone::core;
 
+    // Todo simplify this class
     class VulkanConstRange {
         public:
-            VkPushConstantRange range;
+            VkPushConstantRange const_range;
 
-            VulkanConstRange(const VkPushConstantRange& range);
-
-            static VulkanConstRange common(const size_t& size, const u32& offset);
+            VulkanConstRange(const size_t& size, const u32& offset, const VkShaderStageFlags& stage_flags = VK_SHADER_STAGE_ALL);
     };
 }
 

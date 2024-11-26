@@ -6,39 +6,15 @@
 namespace bebone::gfx {
     using namespace bebone::core;
 
-    struct ShaderTypes;
-
-    // Class used for specifying a shader type
-    struct ShaderType {
-        private:
-            u32 m_value;
-
-            ShaderType(const u32& p_value);
-        
-        public:
-            friend struct ShaderTypes;
-
-            /// Overloaded shader type comparison operator
-            bool operator==(const ShaderType& p_another) const;
-
-            /// Overloaded shader type comparison operator
-            bool operator!=(const ShaderType& p_another) const;
-
-            /// Function that return string representation of shader type
-            std::string to_string() const;
-
-            /// Function that return glslang representation of shader type
-            EShLanguage to_glslang() const;
-
-            /// Function that return opengl representation of shader type
-            GLuint to_opengl() const;
+    enum class ShaderType {
+        FragmentShader,
+        VertexShader
     };
 
-    /// Class that is used for enumerating different shader types
-    struct ShaderTypes {
-        static const ShaderType FRAGMENT_SHADER;
-        static const ShaderType VERTEX_SHADER;
-    };
+    std::string to_string(const ShaderType& type);
+
+    EShLanguage to_glslang(const ShaderType& type);
+    GLuint to_opengl(const ShaderType& type);
 }
 
 #endif

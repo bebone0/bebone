@@ -1,22 +1,18 @@
-#ifndef _BEBONE_GFX_VULKAN_VULKAN_BUFFER_IMPLEMENTATION_H_
-#define _BEBONE_GFX_VULKAN_VULKAN_BUFFER_IMPLEMENTATION_H_
+#ifndef _BEBONE_GFX_VULKAN_BUFFER_IMPLEMENTATION_H_
+#define _BEBONE_GFX_VULKAN_BUFFER_IMPLEMENTATION_H_
 
 #include <vector>
 
 #include "../gfx_backend.h"
 
-#include "vulkan_wrapper.tpp"
+#include "interface/i_vulkan_buffer.h"
+
 #include "vulkan_device_memory.h"
 
-namespace bebone::gfx::vulkan {
+namespace bebone::gfx {
     using namespace bebone::core;
 
-    class VulkanDevice;
-
-    class VulkanBuffer;
-    class VulkanDeviceMemory;
-
-    const static VkBufferUsageFlags VULKAN_BUFFER_ANY_USE_FLAG =
+    const static VkBufferUsageFlags vulkan_buffer_any_use_flag =
         VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
         VK_BUFFER_USAGE_TRANSFER_DST_BIT |
@@ -35,28 +31,34 @@ namespace bebone::gfx::vulkan {
         VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR;
 
     struct VulkanBufferInfo {
-        // VkStructureType sType;
-        // const void* pNext;
+        // VkStructureType type;
+        // const void* ptr_next;
         VkBufferCreateFlags flags = 0;
         // VkDeviceSize size;
-        VkBufferUsageFlags usage = VULKAN_BUFFER_ANY_USE_FLAG;
-        VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        uint32_t queueFamilyIndexCount = 0;
-        uint32_t* pQueueFamilyIndices = nullptr;
+        VkBufferUsageFlags usage = vulkan_buffer_any_use_flag;
+        VkSharingMode sharing_mode = VK_SHARING_MODE_EXCLUSIVE;
+        uint32_t queue_family_index_count = 0;
+        uint32_t* ptr_queue_family_indices = nullptr;
     };
 
-    struct VulkanBufferMemoryTuple {
-        std::shared_ptr<VulkanBuffer> buffer;
-        std::shared_ptr<VulkanDeviceMemory> memory;
-    };
+    class VulkanBuffer : public IVulkanBuffer, private core::NonCopyable {
+        private:
+            IVulkanDevice& device_owner;
 
-    class VulkanBuffer : public VulkanWrapper<VkBuffer>, private core::NonCopyable {
+            VkBuffer buffer;
+
+        private:
+            size_t size; // Todo, Do we really need to store buffer size there ?
+
         public:
-            VulkanBuffer(VulkanDevice& device, VkDeviceSize size, VulkanBufferInfo bufferInfo);
+            VulkanBuffer(IVulkanDevice& device, const size_t& size, VulkanBufferInfo buffer_info);
+            ~VulkanBuffer() override;
 
-            VkMemoryRequirements get_memory_requirements(VulkanDevice& device);
-
-            void destroy(VulkanDevice &device) override;
+            // Vulkan Buffer
+            [[nodiscard]] VkBuffer get_vk_buffer() const override;
+            [[nodiscard]] VkMemoryRequirements get_memory_requirements() const override;
+            [[nodiscard]] size_t get_size() const override;
+            void copy_to_image(IVulkanImage& image) override;
     };
 }
 

@@ -7,11 +7,10 @@ const unsigned int SCR_HEIGHT = 512;
 
 using namespace bebone::assets;
 using namespace bebone::gfx;
-using namespace bebone::gfx::opengl;
 
 struct Vertex {
     Vec3f pos;
-    Vec2f texCord;
+    Vec2f tex_coords;
 };
 
 const std::vector<Vertex> vertices {
@@ -27,20 +26,18 @@ const std::vector<u32> indices {
 };
 
 int main() {
-    GLFWContext::init();
-
-    auto window = WindowFactory::create_window("1. Image example advance", SCR_WIDTH, SCR_HEIGHT, GfxAPI::OPENGL);
+    auto window = WindowFactory::create_window("1. Image example advance", SCR_WIDTH, SCR_HEIGHT, OpenGL);
 
     GLContext::load_opengl();
     GLContext::set_viewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
-    auto vertexShader = GLShaderFactory::create_shader("vertex.glsl", ShaderTypes::VERTEX_SHADER);
-    auto fragmentShader = GLShaderFactory::create_shader("fragment.glsl", ShaderTypes::FRAGMENT_SHADER);
-    GLShaderProgram shaderProgram(vertexShader, fragmentShader);
-    shaderProgram.set_uniform("ourTexture", 0);
+    auto vertex_shader = GLShaderFactory::create_shader("vertex.glsl", ShaderType::VertexShader);
+    auto fragment_shader = GLShaderFactory::create_shader("fragment.glsl", ShaderType::FragmentShader);
+    GLShaderProgram shader_program(vertex_shader, fragment_shader);
+    shader_program.set_uniform("ourTexture", 0);
 
-    vertexShader.destroy();
-    fragmentShader.destroy();
+    vertex_shader.destroy();
+    fragment_shader.destroy();
     
     GLVertexArrayObject vao;
     vao.bind();
@@ -49,7 +46,7 @@ int main() {
     GLElementBufferObject ebo(indices.data(), indices.size() * sizeof(u32));
 
     vao.link_attributes(vbo, 0, 3, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, pos));
-    vao.link_attributes(vbo, 1, 2, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, texCord));
+    vao.link_attributes(vbo, 1, 2, GL_FLOAT, sizeof(Vertex), offsetof(Vertex, tex_coords));
 
     vao.unbind();
 	vbo.unbind();
@@ -65,15 +62,11 @@ int main() {
 
     auto texture = make_shared<GLTexture2D>(image);
 
-    GLContext::enable(GL_CULL_FACE);
-    GLContext::cull_face(GL_BACK);
-    GLContext::front_face(GL_CW);
-
     while (!window->closing()) {
         GLContext::clear_color(0.2f, 0.2f, 0.2f, 1.0f);
         GLContext::clear(GL_COLOR_BUFFER_BIT);
 
-        shaderProgram.enable();
+        shader_program.enable();
 
         texture->bind();
         vao.bind();
@@ -81,10 +74,8 @@ int main() {
         GLContext::draw_elements(GL_TRIANGLES, static_cast<i32>(indices.size()), GL_UNSIGNED_INT, nullptr);
 
         glfwSwapBuffers(window->get_backend());
-        GLFWContext::poll_events();
+        window->pull_events();
     }
-
-    GLFWContext::terminate();
 
     return 0;
 }
