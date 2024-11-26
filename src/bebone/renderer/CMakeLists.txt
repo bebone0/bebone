@@ -11,7 +11,7 @@ list(APPEND BEBONE_RENDERER_INCLUDES
         "${CMAKE_SOURCE_DIR}/3dparty/imgui"
 )
 
-find_package(Vulkan REQUIRED)
+find_package(vulkan REQUIRED)
 
 set(BEBONE_RENDERER_LIBRARIES
     glfw
