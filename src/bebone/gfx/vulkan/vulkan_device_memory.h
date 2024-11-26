@@ -5,53 +5,33 @@
 
 #include "../gfx_backend.h"
 
-#include "vulkan_wrapper.tpp"
+#include "interface/i_vulkan_device_memory.h"
+#include "interface/i_vulkan_device.h"
+#include "interface/i_vulkan_buffer.h"
 
 namespace bebone::gfx {
     using namespace bebone::core;
 
-    class VulkanDevice;
-
     class VulkanBuffer;
     class VulkanImage;
 
-    class VulkanDeviceMemory : public VulkanWrapper<VkDeviceMemory>, private core::NonCopyable {
+    class VulkanDeviceMemory : public IVulkanDeviceMemory, private core::NonCopyable {
+        private:
+            IVulkanDevice& device_owner;
+
+            VkDeviceMemory device_memory;
+
         public:
-            VulkanDeviceMemory(
-                VulkanDevice& device,
-                VkMemoryRequirements requirements,
-                VkMemoryPropertyFlags properties);
+            VulkanDeviceMemory(IVulkanDevice& device, VkMemoryRequirements requirements, VkMemoryPropertyFlags properties);
+            ~VulkanDeviceMemory() override;
 
-            void bind_buffer_memory(
-                VulkanDevice& device,
-                VulkanBuffer& buffer);
-
-            void bind_buffer_memory(
-                VulkanDevice& device,
-                std::shared_ptr<VulkanBuffer>& buffer);
-
-            void bind_image_memory(
-                VulkanDevice& device,
-                VulkanImage& image);
-
-            void bind_image_memory(
-                VulkanDevice& device,
-                std::shared_ptr<VulkanImage>& image);
-
-            void map(VulkanDevice& device, const size_t& size, void** data);
-            void unmap(VulkanDevice& device);
-
-            void upload_data(
-                std::shared_ptr<VulkanDevice>& device,
-                const void* src,
-                const size_t& size);
-
-            void upload_data(
-                VulkanDevice& device,
-                const void* src,
-                const size_t& size);
-
-            void destroy(VulkanDevice& device) override;
+            // Vulkan Device Memory
+            VkDeviceMemory get_vk_device_memory() const override;
+            void bind_buffer_memory(IVulkanBuffer& buffer) override;
+            void bind_image_memory(IVulkanImage& image) override;
+            void map(const size_t& size, void** data) override;
+            void unmap() override;
+            void upload_data(const void* src, const size_t& size) override;
     };
 }
 

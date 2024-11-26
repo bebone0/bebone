@@ -1,51 +1,78 @@
 #include "vulkan_texture.h"
 
-#include "vulkan_device.h"
 #include "vulkan_command_buffer_pool.h"
+#include "vulkan_buffer_memory.h"
+
+#include "vulkan_image.h"
 
 namespace bebone::gfx {
     using namespace bebone::core;
     using namespace bebone::assets;
 
     VulkanTexture::VulkanTexture(
-        VulkanDevice& device,
-        std::shared_ptr<VulkanCommandBufferPool>& command_buffer_pool,
+        IVulkanDevice& device,
         const std::shared_ptr<Image<ColorRGBA>>& raw
     ) {
-        auto [im, mem] = device.create_image_memory(VK_FORMAT_R32G32B32A32_SFLOAT,
-            { static_cast<uint32_t>(raw->get_width()), static_cast<uint32_t>(raw->get_height()), 1},
-            { .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT }
-        );
+        VkExtent3D extent = { static_cast<uint32_t>(raw->get_width()), static_cast<uint32_t>(raw->get_height()), 1};
 
-        image = im; memory = mem;
+        VulkanImageInfo image_info{};
+        image_info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        image = std::make_unique<VulkanImage>(device, ColorRGBA::get_vulkan_format(), extent, image_info);
 
-        image->transition_layout(*command_buffer_pool, device, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+        auto req = image->get_memory_requirements();
+        memory = std::make_unique<VulkanDeviceMemory>(device, req, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        memory->bind_image_memory(*image);
 
+        image->transition_layout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+        // Upload data
         auto size = raw->get_width() * raw->get_height() * sizeof(ColorRGBA);
-        auto staged = device.create_buffer_memory(size);
-        staged.upload_data(device, raw->data(), size);
+        VulkanBufferMemory staged_buffer(device, size);
+        staged_buffer.upload_data(raw->data(), size);
+        staged_buffer.copy_to_image(*image);
 
-        // Todo Probably uploading data to gpu need some sort of render graph api
-        command_buffer_pool->copy_buffer_to_image(device, staged.buffer, image);
+        image->transition_layout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-        device.destroy_all(staged);
-        device.collect_garbage();
-
-        image->transition_layout(*command_buffer_pool, device, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-        sampler = device.create_sampler();
-        view = device.create_image_view(*image, VK_FORMAT_R32G32B32A32_SFLOAT);
+        sampler = std::make_unique<VulkanSampler>(device);
+        view = std::make_unique<VulkanImageView>(device, *image, ColorRGBA::get_vulkan_format());
     }
 
-    void VulkanTexture::destroy(VulkanDevice& device) {
-        if(is_destroyed())
-            return;
+    VulkanTexture::VulkanTexture(
+        IVulkanDevice& device,
+        VkExtent3D extent,
+        VkFormat image_format
+    ) {
+        VulkanImageInfo image_info{};
+        image_info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        image = std::make_unique<VulkanImage>(device, ColorRGBA::get_vulkan_format(), extent, image_info);
 
-        sampler->destroy(device);
-        view->destroy(device);
-        memory->destroy(device);
-        image->destroy(device);
+        auto req = image->get_memory_requirements();
+        memory = std::make_unique<VulkanDeviceMemory>(device, req, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        memory->bind_image_memory(*image);
 
-        mark_destroyed();
+        sampler = std::make_unique<VulkanSampler>(device);
+        view = std::make_unique<VulkanImageView>(device, *image, image_format);
+    }
+
+    VulkanTexture::~VulkanTexture() = default;
+
+    VkMemoryRequirements VulkanTexture::get_memory_requirements() const {
+        return image->get_memory_requirements();
+    }
+
+    VkImage VulkanTexture::get_vk_image() const {
+        return image->get_vk_image();
+    }
+
+    VkExtent3D VulkanTexture::get_extent() const {
+        return image->get_extent();
+    }
+
+    VkImageView VulkanTexture::get_vk_image_view() const {
+        return view->get_vk_image_view();
+    }
+
+    VkSampler VulkanTexture::get_vk_image_sampler() const {
+        return sampler->get_vk_image_sampler();
     }
 }

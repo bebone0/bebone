@@ -1,5 +1,5 @@
-#ifndef _BEBONE_GFX_VULKAN_TEXTURE_H_
-#define _BEBONE_GFX_VULKAN_TEXTURE_H_
+#ifndef _BEBONE_GFX_VULKAN_TEXTURE_TUPLE_H_
+#define _BEBONE_GFX_VULKAN_TEXTURE_TUPLE_H_
 
 #include <vector>
 
@@ -11,70 +11,36 @@
 #include "vulkan_sampler.h"
 #include "vulkan_image_view.h"
 
-namespace bebone::gfx {
-    class VulkanDevice;
+#include "interface/i_vulkan_image.h"
+#include "interface/i_vulkan_image_view.h"
+#include "interface/i_vulkan_sampler.h"
 
+namespace bebone::gfx {
     using namespace bebone::core;
 
-    struct VulkanTexture : public VulkanApi, private core::NonCopyable {
-        std::shared_ptr<VulkanImage> image;
-        std::shared_ptr<VulkanDeviceMemory> memory;
-        std::shared_ptr<VulkanImageView> view;
-        std::shared_ptr<VulkanSampler> sampler;
+    class VulkanTexture : public IVulkanImage, public IVulkanImageView, public IVulkanSampler, private core::NonCopyable {
+        private:
+            std::unique_ptr<VulkanImage> image;
+            std::unique_ptr<VulkanDeviceMemory> memory;
+            std::unique_ptr<VulkanImageView> view;
+            std::unique_ptr<VulkanSampler> sampler;
 
         public:
-            VulkanTexture( // Constructors that require VulkanDevice& need to protected
-                VulkanDevice& device,
-                std::shared_ptr<VulkanCommandBufferPool>& command_buffer_pool,
-                const std::shared_ptr<assets::Image<ColorRGBA>>& raw);
+            VulkanTexture(IVulkanDevice& device, const std::shared_ptr<assets::Image<ColorRGBA>>& raw);
+            VulkanTexture(IVulkanDevice& device, VkExtent3D extent, VkFormat image_format);
+            ~VulkanTexture() override;
 
-            void destroy(VulkanDevice& device) override;
+            // Vulkan Image
+            [[nodiscard]] VkImage get_vk_image() const override;
+            [[nodiscard]] VkMemoryRequirements get_memory_requirements() const override;
+            [[nodiscard]] VkExtent3D get_extent() const override;
+
+            // Vulkan Image View
+            [[nodiscard]] VkImageView get_vk_image_view() const override;
+
+            // Vulkan Sampler
+            [[nodiscard]] VkSampler get_vk_image_sampler() const override;
     };
-}
-
-// Note, this is a std template specialization and it is case-sensitive, please do not touch
-namespace std {
-    template<>
-    struct tuple_size<bebone::gfx::VulkanTexture>
-            : std::integral_constant<std::size_t, 4> { };
-
-    template<>
-    struct tuple_element<0, bebone::gfx::VulkanTexture> {
-        using type = std::shared_ptr<bebone::gfx::VulkanImage>;
-    };
-
-    template<>
-    struct tuple_element<1, bebone::gfx::VulkanTexture> {
-        using type = std::shared_ptr<bebone::gfx::VulkanDeviceMemory>;
-    };
-
-    template<>
-    struct tuple_element<2, bebone::gfx::VulkanTexture> {
-        using type = std::shared_ptr<bebone::gfx::VulkanImageView>;
-    };
-
-    template<>
-    struct tuple_element<3, bebone::gfx::VulkanTexture> {
-        using type = std::shared_ptr<bebone::gfx::VulkanSampler>;
-    };
-}
-
-// Todo, why this needs to be in bebone::gfx namespace ?
-namespace bebone::gfx {
-    template<std::size_t i>
-    auto get(const bebone::gfx::VulkanTexture& tuple) {
-        if constexpr (i == 0) {
-            return tuple.image;
-        } else if constexpr (i == 1) {
-            return tuple.memory;
-        } else if constexpr (i == 2) {
-            return tuple.view;
-        } else if constexpr (i == 3) {
-            return tuple.sampler;
-        } else {
-
-        }
-    }
 }
 
 #endif
