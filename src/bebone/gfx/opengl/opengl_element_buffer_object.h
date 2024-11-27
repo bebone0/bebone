@@ -2,7 +2,6 @@
 #define _BEBONE_GFX_OPENGL_ELEMENT_BUFFER_OBJECT_H_
 
 #include "interface/i_opengl_element_buffer_object.h"
-#include "opengl_buffer_object.h"
 
 namespace bebone::gfx {
     /// EBO
@@ -19,6 +18,8 @@ namespace bebone::gfx {
              */
             GLElementBufferObject(const void* indices, const GLsizeiptr& size, const GLenum& usage = GL_STATIC_DRAW);
 
+            ~GLElementBufferObject() override;
+
             /*!
              * Updates a subset of a EBO data store. Automatically binds and unbinds the EBO. To use this method EBO usage must be set to GL_DYNAMIC_DRAW
              * @param offset - specifies the offset into the EBO where data replacement will begin, measured in bytes.
@@ -26,9 +27,6 @@ namespace bebone::gfx {
              * @param data - specifies a pointer to the new data that will be copied into the data store
              */
             void buffer_sub_data(const GLintptr& offset, const GLsizeiptr& size, const void* data) override;
-
-            /// Destroys the EBO
-            ~GLElementBufferObject() override;
 
             /// Binds EBO
             void bind() override;

@@ -2,7 +2,6 @@
 #define _BEBONE_GFX_OPENGL_VERTEX_BUFFER_OBJECT_H_
 
 #include "interface/i_opengl_vertex_buffer_object.h"
-#include "opengl_buffer_object.h"
 
 namespace bebone::gfx {
     using namespace bebone::core;
