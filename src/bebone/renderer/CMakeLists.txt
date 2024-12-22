@@ -3,12 +3,12 @@ file(GLOB_RECURSE BEBONE_RENDERER_SRC_FILES "*.cpp")
 set(BEBONE_RENDERER_INCLUDES "${CMAKE_SOURCE_DIR}/src/bebone/renderer" )
 
 list(APPEND BEBONE_RENDERER_INCLUDES
-        "${CMAKE_SOURCE_DIR}/3dparty/glad/include"
-        "${CMAKE_SOURCE_DIR}/3dparty/glfw/include"
-        "${CMAKE_SOURCE_DIR}/3dparty/Vulkan-Headers/include"
-        "${CMAKE_SOURCE_DIR}/3dparty/stb"
-        "${CMAKE_SOURCE_DIR}/3dparty/glfw/include"
-        "${CMAKE_SOURCE_DIR}/3dparty/imgui"
+    "${PROJECT_SOURCE_DIR}/3dparty/glad/include"
+    "${PROJECT_SOURCE_DIR}/3dparty/glfw/include"
+    "${PROJECT_SOURCE_DIR}/3dparty/Vulkan-Headers/include"
+    "${PROJECT_SOURCE_DIR}/3dparty/stb"
+    "${PROJECT_SOURCE_DIR}/3dparty/glfw/include"
+    "${PROJECT_SOURCE_DIR}/3dparty/imgui"
 )
 
 find_package(vulkan REQUIRED)
