@@ -10,7 +10,7 @@ namespace bebone::core {
         private:
             static double delta_time;
 
-    public:
+        public:
             static const steady_clock::time_point startup_time;
 
             static double get_delta_time();
