@@ -54,16 +54,18 @@ namespace bebone::core {
         inline explicit operator Vec2<T>() const;
         inline explicit operator Vec3<T>() const;
 
-        inline std::string to_string() const;
+        [[nodiscard]] inline std::string to_string() const;
+        [[nodiscard]] inline Vec3<T> to_vec3() const;
+        [[nodiscard]] inline Vec2<T> to_vec2() const;
 
         inline Vec4<T>& clamp(const T& min_value, const T& max_value);
         inline Vec4<T>& clamp(const Vec4<T>& min_value, const Vec4<T>& max_value);
         
         inline Vec4<T>& abs();
-        inline f32 length() const;
-        inline Vec4<T> normalize() const;
+        [[nodiscard]] inline f32 length() const;
+        [[nodiscard]] inline Vec4<T> normalize() const;
 
-        inline bool is_normalized() const;
+        [[nodiscard]] inline bool is_normalized() const;
     };
 }
 
@@ -220,6 +222,16 @@ namespace bebone::core {
         std::stringstream ss;
         ss << x << ' ' << y << ' ' << z << ' ' << w;
         return ss.str();
+    }
+
+    template<typename T>
+    inline Vec3<T> Vec4<T>::to_vec3() const {
+        return Vec3<T>(x, y, z);
+    }
+
+    template<typename T>
+    inline Vec2<T> Vec4<T>::to_vec2() const {
+        return Vec2<T>(x, y, z);
     }
 
     /**
