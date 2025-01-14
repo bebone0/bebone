@@ -17,6 +17,8 @@ namespace bebone::core {
         T z;
         T w;
 
+        using value_type = T;
+
         constexpr Vec4() = default;
         constexpr Vec4(const T& x, const T& y, const T& z, const T& w) : x(x), y(y), z(z), w(w) {}
 
