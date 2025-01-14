@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ostream>
 #include <cstdarg>
+#include <format>
 
 #include "log_level.h"
 

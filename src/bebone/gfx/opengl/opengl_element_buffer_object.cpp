@@ -1,7 +1,9 @@
 #include "opengl_element_buffer_object.h"
 
 namespace bebone::gfx {
-    GLElementBufferObject::GLElementBufferObject(const void* indices, const GLsizeiptr& size, const GLenum& usage) : GLBufferObject() {
+    GLElementBufferObject::GLElementBufferObject(const void* indices, const GLsizeiptr& size, const GLenum& usage) {
+        glGenBuffers(1, &id);
+        
         bind();
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, usage);
     }

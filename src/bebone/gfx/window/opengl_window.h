@@ -15,7 +15,7 @@ namespace bebone::gfx {
             */
             GLWindow(const std::string& title, const int& width, const int& height, const WindowProperties& properties = {});
 
-            GfxAPI get_api() const override;
+            [[nodiscard]] GfxAPI get_api() const override;
     };
 }
 

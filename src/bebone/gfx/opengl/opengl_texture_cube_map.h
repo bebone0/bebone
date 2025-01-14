@@ -1,5 +1,5 @@
-#ifndef _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_CUBE_MAP_H_
-#define _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_CUBE_MAP_H_
+#ifndef _BEBONE_GFX_OPENGL_TEXTURE_CUBE_MAP_H_
+#define _BEBONE_GFX_OPENGL_TEXTURE_CUBE_MAP_H_
 
 #include <array>
 #include "../../assets/image/image.h"

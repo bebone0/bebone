@@ -27,6 +27,7 @@ namespace bebone::core {
         prefix << UnixConsoleColors::Gray << "[" << formatted_time << " " << log_level_color << log_level_str << UnixConsoleColors::Gray << "] ";
 
         stream << prefix.str() << UnixConsoleColors::Default << format << std::endl;
+        stream.flush();
     }
 
     void ConsoleLogger::log(const LogLevel& level, std::string_view format, std::format_args&& args) {
@@ -50,6 +51,7 @@ namespace bebone::core {
         prefix << UnixConsoleColors::Gray << "[" << formatted_time << " " << log_level_color << log_level_str << UnixConsoleColors::Gray << "] ";
 
         stream << prefix.str() << UnixConsoleColors::Default << std::vformat(format, args) << std::endl;
+        stream.flush();
     }
 
     void ConsoleLogger::set_log_level(const LogLevel& level) {

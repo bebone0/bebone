@@ -22,7 +22,7 @@ namespace bebone::gfx {
             */
             void create_window_surface(VkInstance instance, VkSurfaceKHR *surface);
 
-            GfxAPI get_api() const override;
+            [[nodiscard]] GfxAPI get_api() const override;
     };
 }
 

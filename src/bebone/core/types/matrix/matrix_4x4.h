@@ -44,8 +44,8 @@ namespace bebone::core {
         static Matrix<f32, 4, 4> view(const Vec3f& origin, const Vec3f& direction, const Vec3f& up = Vec3f::up);
         static Matrix<f32, 4, 4> look_at(const Vec3f& origin, const Vec3f& center, const Vec3f& up = Vec3f::up);
 
-        inline Matrix<f32, 4, 4> transpose() const;
-        inline Matrix<f32, 4, 4> inverse() const;
+        [[nodiscard]] inline Matrix<f32, 4, 4> transpose() const;
+        [[nodiscard]] inline Matrix<f32, 4, 4> inverse() const;
 
         inline f32& operator()(const size_t& row, const size_t& col);
         inline const f32& operator()(const size_t& row, const size_t& col) const;
@@ -66,8 +66,8 @@ namespace bebone::core {
         inline bool operator==(const Matrix<f32, 4, 4>& other) const;
         inline bool operator!=(const Matrix<f32, 4, 4>& other) const;
 
-        std::string to_string() const;
-        const f32* get_raw() const;
+        [[nodiscard]] std::string to_string() const;
+        [[nodiscard]] const f32* get_raw() const;
     };
 
     inline Matrix<f32, 4, 4> Matrix<f32, 4, 4>::splat(const f32& value) {

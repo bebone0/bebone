@@ -1,0 +1,3 @@
+add_subdirectory(0_agnostic_window)
+add_subdirectory(1_agnostic_hello_triangle)
+add_subdirectory(2_agnostic_texture)

@@ -38,7 +38,8 @@ int main() {
     auto window = WindowFactory::create_window("3. Vulkan 3d cube example", 800, 600, GfxAPI::Vulkan);
 
     VulkanInstance instance;
-    auto device = instance.create_device(window);
+    VulkanDevice device(instance, window);
+    VulkanSwapChain swapChain
     auto swap_chain = device->create_swap_chain(window);
 
     auto pipeline_manager = device->create_pipeline_manager();

@@ -20,6 +20,8 @@ namespace bebone::core {
         T x;
         T y;
 
+        using value_type = T;
+
         constexpr Vec2() = default;
         constexpr Vec2(const T& x, const T& y) : x(x), y(y) {}
 
