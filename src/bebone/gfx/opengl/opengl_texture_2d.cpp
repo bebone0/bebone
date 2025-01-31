@@ -17,6 +17,19 @@ namespace bebone::gfx {
         unbind();
     }
 
+    void GLTexture2D::create_gl_texture(void* buffer, u32 format, u32 type) {
+        bind();
+        glTexImage2D(
+                get_texture_type(),
+                0, format, width, height, 0,
+                format, type, buffer);
+
+        const GLTextureParameters parameters;
+        configure_gl_texture(parameters);
+        generate_mipmap();
+        unbind();
+    }
+
     template<typename Color>
     void GLTexture2D::create_gl_texture(const std::shared_ptr<Image<Color>>& image) {
         width = image->get_width();
@@ -47,6 +60,14 @@ namespace bebone::gfx {
               height(height)
     {
         create_gl_texture();
+    }
+
+    GLTexture2D::GLTexture2D(const int& width, const int& height, void* buffer, u32 format, u32 type)
+            : GLTexture(GL_TEXTURE_2D),
+              width(width),
+              height(height)
+    {
+        create_gl_texture(buffer, format, type);
     }
 
     GLTexture2D::GLTexture2D(const std::string& file_path)

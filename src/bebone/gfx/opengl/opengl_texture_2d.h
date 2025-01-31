@@ -17,6 +17,8 @@ namespace bebone::gfx {
 
             void create_gl_texture();
 
+            void create_gl_texture(void* buffer, u32 format, u32 type);
+
             template<typename Color>
             void create_gl_texture(const std::shared_ptr<Image<Color>>& image);
 
@@ -27,6 +29,8 @@ namespace bebone::gfx {
             * @param height - Texture height
             */
             GLTexture2D(const int& width, const int& height);
+
+            GLTexture2D(const int& width, const int& height, void* buffer, u32 format, u32 type);
 
             /*!
             * Constructor, loads image from a file
