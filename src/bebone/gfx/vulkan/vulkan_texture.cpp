@@ -17,7 +17,7 @@ namespace bebone::gfx {
 
         VulkanImageInfo image_info{};
         image_info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        image = std::make_unique<VulkanImage>(device, ColorRGBA::get_vulkan_format(), extent, image_info);
+        image = std::make_unique<VulkanImage>(device, get_vulkan_format<ColorRGBA>(), extent, image_info);
 
         auto req = image->get_memory_requirements();
         memory = std::make_unique<VulkanDeviceMemory>(device, req, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -34,7 +34,7 @@ namespace bebone::gfx {
         image->transition_layout(VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         sampler = std::make_unique<VulkanSampler>(device);
-        view = std::make_unique<VulkanImageView>(device, *image, ColorRGBA::get_vulkan_format());
+        view = std::make_unique<VulkanImageView>(device, *image, get_vulkan_format<ColorRGBA>());
     }
 
     VulkanTexture::VulkanTexture(
@@ -44,7 +44,7 @@ namespace bebone::gfx {
     ) {
         VulkanImageInfo image_info{};
         image_info.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        image = std::make_unique<VulkanImage>(device, ColorRGBA::get_vulkan_format(), extent, image_info);
+        image = std::make_unique<VulkanImage>(device, get_vulkan_format<ColorRGBA>(), extent, image_info);
 
         auto req = image->get_memory_requirements();
         memory = std::make_unique<VulkanDeviceMemory>(device, req, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);

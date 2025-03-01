@@ -4,6 +4,7 @@
 #include "../../assets/image/image.h"
 
 #include "../gfx_backend.h"
+#include "../color_extensions.h"
 
 #include "opengl_texture.h"
 

@@ -11,8 +11,6 @@ set(SHADERC_SKIP_EXAMPLES ON)
 set(SHADERC_SKIP_COPYRIGHT_CHECK ON)
 add_subdirectory(glslang)
 
-add_subdirectory("Vulkan-Headers")
-
 add_subdirectory(stb)
 
 add_subdirectory(imgui)

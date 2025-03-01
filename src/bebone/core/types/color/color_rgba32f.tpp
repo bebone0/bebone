@@ -18,7 +18,7 @@ namespace bebone::core {
         static const Color<R32G32B32A32Float> MAGENTA;
         static const Color<R32G32B32A32Float> CYAN;
 
-        operator Vec4<f32>() const { return { r, g, b, a }; }
+        explicit operator Vec4<f32>() const { return { r, g, b, a }; }
 
         template<class DesiredColor>
         DesiredColor to() const;
@@ -37,18 +37,6 @@ namespace bebone::core {
 
         static inline constexpr Color<R32G32B32A32Float> monochrome(const f32& v) {
             return splat(v);
-        }
-
-        static inline constexpr GLuint get_gl_format() {
-            return GL_RGBA;
-        }
-
-        static inline constexpr VkFormat get_vulkan_format() {
-            return VK_FORMAT_R32G32B32A32_SFLOAT;
-        }
-
-        static inline constexpr GLuint get_gl_type() {
-            return GL_FLOAT;
         }
 
         static inline Color<R32G32B32A32Float> random() {

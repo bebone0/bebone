@@ -2,20 +2,21 @@ file(GLOB_RECURSE BEBONE_GFX_SRC_FILES "*.cpp")
 
 set(BEBONE_GFX_INCLUDES "${CMAKE_SOURCE_DIR}/src/bebone/gfx")
 
+find_package(Vulkan REQUIRED)
+
 list(APPEND BEBONE_GFX_INCLUDES 
     "${PROJECT_SOURCE_DIR}/3dparty/glad/include"
     "${PROJECT_SOURCE_DIR}/3dparty/glfw/include"
-    "${PROJECT_SOURCE_DIR}/3dparty/Vulkan-Headers/include"
     "${PROJECT_SOURCE_DIR}/3dparty/stb"
     "${PROJECT_SOURCE_DIR}/3dparty/glfw/include"
     "${PROJECT_SOURCE_DIR}/3dparty/imgui"
-)   
+    ${Vulkan_INCLUDE_DIRS}
+)
 
-find_package(Vulkan REQUIRED)
-
-set(BEBONE_GFX_LIBRARIES 
+set(BEBONE_GFX_LIBRARIES
     glfw
     stb_image
+    stb_truetype
     glad
     glslang
     SPIRV

@@ -18,7 +18,7 @@ namespace bebone::core {
         static const Color<R8G8B8Uint> MAGENTA;
         static const Color<R8G8B8Uint> CYAN;
 
-        operator Vec3<u8>() const { return { r, g, b }; }
+        explicit operator Vec3<u8>() const { return { r, g, b }; }
 
         template<class DesiredColor>
         DesiredColor to() const;
@@ -37,19 +37,6 @@ namespace bebone::core {
 
         static inline constexpr Color<R8G8B8Uint> monochrome(const u8& v) {
             return splat(v);
-        }
-
-        static inline constexpr u32 get_gl_format() {
-            return GL_RGB;
-        }
-
-        // Todo check SRGB is a valid format
-        static inline constexpr VkFormat get_vulkan_format() {
-            return VK_FORMAT_R8G8B8_SRGB;
-        }
-
-        static inline constexpr u32 get_gl_type() {
-            return GL_UNSIGNED_BYTE;
         }
 
         static inline Color<R8G8B8Uint> random() {
