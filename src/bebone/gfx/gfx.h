@@ -18,5 +18,6 @@
 #include "shaders/spirv_shader_compiler.h"
 
 #include "glfw_context.h"
+#include "color_extensions.h"
 
 #endif

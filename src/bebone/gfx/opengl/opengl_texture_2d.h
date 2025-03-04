@@ -1,9 +1,10 @@
-#ifndef _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_2D_H_
-#define _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_2D_H_
+#ifndef _BEBONE_GFX_OPENGL_TEXTURE_2D_H_
+#define _BEBONE_GFX_OPENGL_TEXTURE_2D_H_
 
 #include "../../assets/image/image.h"
 
 #include "../gfx_backend.h"
+#include "../color_extensions.h"
 
 #include "opengl_texture.h"
 
@@ -17,6 +18,8 @@ namespace bebone::gfx {
 
             void create_gl_texture();
 
+            void create_gl_texture(void* buffer, u32 format, u32 type);
+
             template<typename Color>
             void create_gl_texture(const std::shared_ptr<Image<Color>>& image);
 
@@ -27,6 +30,8 @@ namespace bebone::gfx {
             * @param height - Texture height
             */
             GLTexture2D(const int& width, const int& height);
+
+            GLTexture2D(const int& width, const int& height, void* buffer, u32 format, u32 type);
 
             /*!
             * Constructor, loads image from a file

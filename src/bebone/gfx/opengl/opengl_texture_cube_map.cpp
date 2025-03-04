@@ -9,8 +9,8 @@ namespace bebone::gfx {
             const auto width = images[i]->get_width();
             const auto height = images[i]->get_height();
 
-            const auto format = ColorRGBA::get_gl_format();
-            const auto type = ColorRGBA::get_gl_type();
+            const auto format = get_gl_format<ColorRGBA>();
+            const auto type = get_gl_type<ColorRGBA>();
 
             glTexImage2D(
                 GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,

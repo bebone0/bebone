@@ -18,6 +18,11 @@ namespace bebone::core {
     }
 
     template<typename T>
+    inline T cubic_interpolate(const T& start, const T& finish, const f32& t) {
+        return (finish - start) * (3.0 - t * 2.0) * t * t + start;
+    }
+
+    template<typename T>
     inline T smoothstep(const T& start, const T& finish, const f32& t) {
         const f32 v1 = t * t;
         const f32 v2 = 1.0f - (1.0f - t) * (1.0f - t);

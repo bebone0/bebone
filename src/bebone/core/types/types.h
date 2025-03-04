@@ -15,5 +15,6 @@
 #include "utils/proper_euler_angles.h"
 #include "utils/trait_bryan_angles.h"
 #include "utils/interpolation.tpp"
+#include "utils/rodrigues_rotation.h"
 
 #endif

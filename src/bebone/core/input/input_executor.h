@@ -14,8 +14,8 @@ namespace bebone::core {
             std::shared_ptr<Input> input;
             std::queue<Key> queued_keys;
 
-            std::map<KeyCode, bool> pressed_keys;
-            std::map<KeyCode, InputType> key_input_types;
+            std::unordered_map<KeyCode, bool> pressed_keys;
+            std::unordered_map<KeyCode, InputType> key_input_types;
             std::vector<KeyCode> released_keys;
 
             void convert_released_keys_to_none();

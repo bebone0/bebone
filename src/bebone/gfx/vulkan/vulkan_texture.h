@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "../gfx_backend.h"
+#include "../color_extensions.h"
 
 #include "../../assets/image/image.h"
 

@@ -106,6 +106,10 @@ namespace bebone::gfx {
         return glfwWindowShouldClose(window);
     }
 
+    void Window::set_title(const std::string& title) {
+        glfwSetWindowTitle(window, title.c_str());
+    }
+
     const int& Window::get_width() const {
         return width;
     }
@@ -115,7 +119,7 @@ namespace bebone::gfx {
     }
 
     Vec2i Window::get_size() const {
-        return Vec2i(width, height);
+        return { width, height };
     }
 
     f32 Window::get_aspect() const {
