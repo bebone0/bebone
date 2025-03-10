@@ -2,13 +2,14 @@ file(GLOB_RECURSE BEBONE_GFX_SRC_FILES "*.cpp")
 
 set(BEBONE_GFX_INCLUDES "${CMAKE_SOURCE_DIR}/src/bebone/gfx")
 
-find_package(Vulkan REQUIRED COMPONENTS glslang SPIRV-Tools)
+find_package(Vulkan)
 
-list(APPEND BEBONE_GFX_INCLUDES 
-    "${PROJECT_SOURCE_DIR}/3dparty/glad/include"
-    "${PROJECT_SOURCE_DIR}/3dparty/stb"
-    "${PROJECT_SOURCE_DIR}/3dparty/glfw/include"
-    ${Vulkan_INCLUDE_DIRS}
+list(APPEND BEBONE_GFX_INCLUDES
+        "${PROJECT_SOURCE_DIR}/3dparty/glad/include"
+        "${PROJECT_SOURCE_DIR}/3dparty/stb"
+        "${PROJECT_SOURCE_DIR}/3dparty/glfw/include"
+        "${PROJECT_SOURCE_DIR}/3dparty/imgui"
+        ${Vulkan_INCLUDE_DIRS}
 )
 
 set(BEBONE_GFX_LIBRARIES
@@ -17,8 +18,9 @@ set(BEBONE_GFX_LIBRARIES
     stb_truetype
     glad
     Vulkan::Vulkan
-    Vulkan::glslang
-    Vulkan::SPIRV-Tools
+    glslang
+    SPIRV
+    glslang-default-resource-limits
 )
 
 set(BEBONE_GFX_INCLUDES "${BEBONE_GFX_INCLUDES}" CACHE INTERNAL "")
