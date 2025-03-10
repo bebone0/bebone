@@ -45,6 +45,9 @@ int main() {
     VulkanCommandBufferPool command_buffer_pool(device);
     auto command_buffers = command_buffer_pool.create_command_buffers(3);
 
+    /*
+    VulkanTexture texture(device);
+
     auto texture = device->create_texture("image.png");
     std::ignore = pipeline_manager->bind_texture(device, texture);
 
@@ -76,6 +79,7 @@ int main() {
         if(!swap_chain->submit_present_command_buffers(device, cmd, &frame).is_ok()) // Todo check if window is resized
             continue;
     }
+    */
 
     // instance->destroy();
 

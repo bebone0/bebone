@@ -20,6 +20,8 @@ namespace bebone::core {
         T x;
         T y;
 
+        using value_type = T;
+
         constexpr Vec2() = default;
         constexpr Vec2(const T& x, const T& y) : x(x), y(y) {}
 
@@ -123,12 +125,9 @@ namespace bebone::core {
 
     template<typename T>
     Vec2<T> Vec2<T>::operator *(const T& scalar) const { return Vec2(x * scalar, y * scalar); }
-    
+
     template<typename T>
-    Vec2<T> Vec2<T>::operator /(T scalar) const {
-        scalar = 1.0f / scalar;
-        return *this * scalar;
-    }
+    Vec2<T> Vec2<T>::operator /(T scalar) const { return Vec2(x / scalar, y / scalar); }
 
     template<typename T>
     Vec2<T>& Vec2<T>::operator +=(const T& scalar) { x += scalar; y += scalar; return *this; }
@@ -140,10 +139,7 @@ namespace bebone::core {
     Vec2<T>& Vec2<T>::operator *=(const T& scalar) { x *= scalar; y *= scalar; return *this; }
     
     template<typename T>
-    Vec2<T>& Vec2<T>::operator /=(T scalar) {
-        scalar = 1.0f / scalar;
-        return *this *= scalar;
-    }
+    Vec2<T>& Vec2<T>::operator /=(T scalar) { x /= scalar; y /= scalar; return *this; }
 
     template<typename T>
     Vec2<T> Vec2<T>::operator -() const { return Vec2(-x, -y); }

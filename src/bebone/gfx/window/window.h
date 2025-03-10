@@ -61,6 +61,8 @@ namespace bebone::gfx {
             */
             [[nodiscard]] bool closing() const;
 
+            void set_title(const std::string& title);
+
             /// Function that returns window width
             const int& get_width() const;
 

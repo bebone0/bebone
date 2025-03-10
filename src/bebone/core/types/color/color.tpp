@@ -11,11 +11,6 @@
 
 #include "color_format.h"
 
-#include <glad/glad.h>
-
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
 namespace bebone::core {
     template<ColorFormat Format>
     struct Color {

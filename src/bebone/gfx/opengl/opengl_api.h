@@ -1,10 +1,9 @@
-#ifndef _BEBONE_GFX_OPENGL_OPENGL_API_H_
-#define _BEBONE_GFX_OPENGL_OPENGL_API_H_
+#ifndef _BEBONE_GFX_OPENGL_API_H_
+#define _BEBONE_GFX_OPENGL_API_H_
 
 #include "opengl_context.h"
 #include "opengl_gpu_properties.h"
 
-#include "opengl_buffer_object.h"
 #include "opengl_vertex_array_object.h"
 #include "opengl_vertex_buffer_object.h"
 #include "opengl_element_buffer_object.h"

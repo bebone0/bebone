@@ -10,8 +10,7 @@ namespace bebone::assets {
 
     template<typename Color>
     void ImagePainter<Color>::paint_pixel(const size_t& x_pos, const size_t& y_pos, const Color& color) {
-        const size_t height = target_image->get_height();
-        target_image->at(x_pos, height - y_pos) = color;
+        target_image->at(x_pos, y_pos) = color;
     }
 
     template<typename Color>

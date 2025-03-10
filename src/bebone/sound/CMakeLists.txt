@@ -1,10 +1,6 @@
 set(BEBONE_SOUND_INCLUDES
-    "${CMAKE_SOURCE_DIR}/src/bebone/sound"
-    "${CMAKE_SOURCE_DIR}/3dparty/miniaudio"
-    "${CMAKE_SOURCE_DIR}/3dparty/stb" # Todo fix this cringe
-    "${CMAKE_SOURCE_DIR}/3dparty/glad/include" # Todo fix this cringe
-    "${CMAKE_SOURCE_DIR}/3dparty/glfw/include" # Todo fix this cringe
-    "${CMAKE_SOURCE_DIR}/3dparty/Vulkan-Headers/include" # Todo fix this cringe
+    "${PROJECT_SOURCE_DIR}/src/bebone/sound"
+    "${PROJECT_SOURCE_DIR}/3dparty/miniaudio"
 )
 
 set(BEBONE_SOUND_INCLUDES "${BEBONE_SOUND_INCLUDES}" CACHE INTERNAL "")

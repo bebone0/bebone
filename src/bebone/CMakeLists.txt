@@ -44,7 +44,7 @@ if(BEBONE_BUILD_SOUND)
     target_link_libraries(bebone bebone_sound)
 endif()
 
-set(BEBONE_INCLUDES "${CMAKE_SOURCE_DIR}/src")
+set(BEBONE_INCLUDES "${PROJECT_SOURCE_DIR}/src")
 
 list(APPEND BEBONE_INCLUDES ${BEBONE_ASSETS_INCLUDES})   
 list(APPEND BEBONE_INCLUDES ${BEBONE_CORE_INCLUDES})   
