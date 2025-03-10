@@ -8,7 +8,6 @@ list(APPEND BEBONE_GFX_INCLUDES
     "${PROJECT_SOURCE_DIR}/3dparty/glad/include"
     "${PROJECT_SOURCE_DIR}/3dparty/stb"
     "${PROJECT_SOURCE_DIR}/3dparty/glfw/include"
-    "${PROJECT_SOURCE_DIR}/3dparty/imgui"
     ${Vulkan_INCLUDE_DIRS}
 )
 
@@ -20,7 +19,6 @@ set(BEBONE_GFX_LIBRARIES
     Vulkan::Vulkan
     Vulkan::glslang
     Vulkan::SPIRV-Tools
-    imgui
 )
 
 set(BEBONE_GFX_INCLUDES "${BEBONE_GFX_INCLUDES}" CACHE INTERNAL "")

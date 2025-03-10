@@ -12,8 +12,6 @@ add_subdirectory(glfw)
 # add_subdirectory(glslang)
 
 add_subdirectory(stb)
-
-add_subdirectory(imgui)
 add_subdirectory(miniaudio)
 
 add_subdirectory(google-test)
