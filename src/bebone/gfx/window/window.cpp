@@ -29,6 +29,7 @@ namespace bebone::gfx {
         // Mouse callbacks
         glfwSetMouseButtonCallback(window, glfw_mouse_button_callback);
         glfwSetKeyCallback(window, glfw_key_callback);
+        glfwSetScrollCallback(window, glfw_mouse_scroll_callback);
 
         add_listener(window_handler.get_window_size_listener());
     }
@@ -91,6 +92,11 @@ namespace bebone::gfx {
     void Window::glfw_mouse_button_callback(GLFWwindow* glfw_window, int button, int action, int mods) {
         auto* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
         window->fire(InputMouseButtonEvent(button, action, mods));
+    }
+
+    void Window::glfw_mouse_scroll_callback(GLFWwindow* glfw_window, double xoffset, double yoffset) {
+        auto* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+        window->fire(InputMouseScrollEvent(xoffset, yoffset));
     }
 
     void Window::glfw_key_callback(GLFWwindow* glfw_window, int key, int scancode, int action, int mods) {

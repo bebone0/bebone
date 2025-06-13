@@ -108,6 +108,8 @@ namespace bebone::gfx {
 
             /// GLFW mouse button press callback
             static void glfw_mouse_button_callback(GLFWwindow* glfw_window, int button, int action, int mods);
+            /// GLFW mouse scroll delta callback
+            static void glfw_mouse_scroll_callback(GLFWwindow* glfw_window, double xoffset, double yoffset);
             /// GLFW key press callback
             static void glfw_key_callback(GLFWwindow* glfw_window, int key, int scancode, int action, int mods);
 

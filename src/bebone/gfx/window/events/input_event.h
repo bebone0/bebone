@@ -9,7 +9,8 @@ namespace bebone::gfx {
     /// Input events enumeration
     enum InputEvent {
         Key,
-        MouseButton
+        MouseButton,
+        MouseScroll
     };
 
     /// Key event structure
@@ -42,6 +43,20 @@ namespace bebone::gfx {
          * @param mods - mouse button mod
         */
         InputMouseButtonEvent(const i32& button, const i32& action, const i32& mods) : button(button), action(action), mods(mods) { }
+    };
+
+    /// Mouse button press event structure
+    struct InputMouseScrollEvent : public Event<InputEvent, MouseButton> {
+        f32 xscroll;
+        f32 yscroll;
+
+        /*!
+         * Default constructor
+         * @param button - mouse button key code
+         * @param action - event action
+         * @param mods - mouse button mod
+        */
+        InputMouseScrollEvent(const f32& xscroll, const f32& yscroll) : xscroll(xscroll), yscroll(yscroll) { }
     };
 }
 
