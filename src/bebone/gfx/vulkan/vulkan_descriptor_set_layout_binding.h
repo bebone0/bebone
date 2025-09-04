@@ -1,18 +1,23 @@
-#ifndef _BEBONE_GFX_VULKAN_VULKAN_DESCRIPTOR_SET_LAYOUT_BINDING_H_
-#define _BEBONE_GFX_VULKAN_VULKAN_DESCRIPTOR_SET_LAYOUT_BINDING_H_
+#ifndef _BEBONE_GFX_VULKAN_DESCRIPTOR_SET_LAYOUT_BINDING_H_
+#define _BEBONE_GFX_VULKAN_DESCRIPTOR_SET_LAYOUT_BINDING_H_
 
 #include "../gfx_backend.h"
 
-namespace bebone::gfx::vulkan {
+namespace bebone::gfx {
     using namespace bebone::core;
 
+    enum VulkanDescriptorSetLayoutBindingType {
+        Uniform,
+        Storage,
+        Sampler
+    };
+
     class VulkanDescriptorSetLayoutBinding {
-        private:
+        public:
+            VkDescriptorSetLayoutBinding descriptor_set_layout_binding;
 
         public:
-            VkDescriptorSetLayoutBinding binding;
-
-            static VulkanDescriptorSetLayoutBinding bindless_uniform(const u32& binding);
+            VulkanDescriptorSetLayoutBinding(const VulkanDescriptorSetLayoutBindingType& type, const u32& binding);
     };
 }
 

@@ -1,16 +1,16 @@
-#ifndef _BEBONE_GFX_OPENGL_OPENGL_EXTENSION_CHECKER_H_
-#define _BEBONE_GFX_OPENGL_OPENGL_EXTENSION_CHECKER_H_
+#ifndef _BEBONE_GFX_OPENGL_EXTENSION_CHECKER_H_
+#define _BEBONE_GFX_OPENGL_EXTENSION_CHECKER_H_
 
 #include "../gfx_backend.h"
 
 #include <set>
 #include <string>
 
-namespace bebone::gfx::opengl {
+namespace bebone::gfx {
     /// Class used fort checking if specific opengl gl extension is available on device
     class GLExtensionChecker : private core::NonCopyable {
         private:
-            std::set<std::string> m_extensions;
+            std::set<std::string> extensions;
 
             /// Default constructor
             GLExtensionChecker();

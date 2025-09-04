@@ -1,5 +1,5 @@
-#ifndef _BEBONE_GFX_VULKAN_VULKAN_DEVICE_H_
-#define _BEBONE_GFX_VULKAN_VULKAN_DEVICE_H_
+#ifndef _BEBONE_GFX_VULKAN_DEVICE_H_
+#define _BEBONE_GFX_VULKAN_DEVICE_H_
 
 #include <iostream>
 #include <set>
@@ -11,135 +11,76 @@
 #include "../shaders/shader_type.h"
 #include "../shaders/shader_code.h"
 
-#include "vulkan_wrapper.tpp"
 #include "vulkan_instance.h"
 #include "vulkan_device_chooser.h"
 
-#include "vulkan_buffer.h"
-#include "vulkan_image.h"
+#include "vulkan_sampler.h"
 #include "vulkan_image_view.h"
 #include "vulkan_pipeline.h"
+#include "vulkan_texture.h"
+#include "vulkan_descriptor_set.h"
+#include "vulkan_descriptor_set_layout_binding.h"
+#include "vulkan_attachment.h"
+#include "vulkan_swap_chain_image.h"
 
-namespace bebone::gfx::vulkan {
+#include "interface/i_vulkan_device.h"
+
+namespace bebone::gfx {
     class VulkanSwapChain;
     class VulkanPipeline;
     class VulkanDescriptorPool;
     class VulkanCommandBufferPool;
+    class VulkanCommandBuffer;
     class VulkanShaderModule;
     class VulkanPipelineLayout;
     class VulkanDescriptorSetLayout;
-    class VulkanDescriptorSetLayoutBinding;
     class VulkanConstRange;
+    class VulkanPipelineManager;
+    class VulkanRenderTarget;
+    class VulkanRenderPass;
+    class VulkanFramebuffer;
 
-    class VulkanDevice : private core::NonCopyable {
+    class VulkanDevice : public IVulkanDevice, private core::NonCopyable {
         private:
-            VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+            IVulkanInstance& instance_owner;
 
-            VkDevice device_;
-            VkSurfaceKHR surface_;
+            VkDevice device;
+            VkSurfaceKHR surface;
+            VkQueue graphics_queue;
+            VkQueue present_queue;
 
-            VkQueue graphicsQueue_;
-            VkQueue presentQueue_;
-
-            VulkanInstance &vulkanInstance;
-
-            void pick_physical_device(VulkanInstance &vulkanInstance);
-            void create_logical_device();
-
-        public:
             VkPhysicalDeviceProperties properties;
 
-            VulkanDevice(
-                VulkanInstance& _vulkanInstance,
-                VulkanWindow &window);
+            // Todo, abstract all things below
+            VkPhysicalDevice physical_device = VK_NULL_HANDLE;
 
-            std::shared_ptr<VulkanDeviceMemory> create_device_memory(
-                VkMemoryRequirements memRequirements,
-                VkMemoryPropertyFlags properties);
+            void pick_physical_device(IVulkanInstance &instance);
+            void create_logical_device();
 
-            std::shared_ptr<VulkanBuffer> create_buffer(
-                const size_t& size,
-                VulkanBufferInfo bufferInfo = {});
+            // Todo, maybe this can be optimized
+            std::unique_ptr<VulkanCommandBufferPool> command_buffer_pool;
 
-            VulkanBufferMemoryTuple create_buffer_memory(
-                const size_t& size,
-                VulkanBufferInfo bufferInfo = {});
+        public:
+            VulkanDevice(IVulkanInstance& instance, std::unique_ptr<Window>& window);
+            ~VulkanDevice() override;
 
-            std::vector<std::shared_ptr<VulkanBuffer>> create_buffers(
-                const size_t& size,
-                const size_t& bufferCount,
-                VulkanBufferInfo bufferInfo = {});
+            //  Todo make this a ICommandBufferPool interface
+            // std::unique_ptr<VulkanCommandBuffer> begin_single_time_commands() override;
+            // void end_single_time_commands(std::unique_ptr<VulkanCommandBuffer>& command_buffer) override;
 
-            std::vector<VulkanBufferMemoryTuple> create_buffer_memorys(
-                const size_t& size,
-                const size_t& bufferCount,
-                VulkanBufferInfo bufferInfo = {});
+            VulkanQueueFamilyIndices find_physical_queue_families() override { return VulkanDeviceChooser::find_queue_families(physical_device, surface); }
+            VulkanSwapChainSupportDetails get_swap_chain_support() override { return VulkanDeviceChooser::query_swap_chain_support(physical_device, surface); }
 
-            std::shared_ptr<VulkanImage> create_image(
-                VkFormat format,
-                VkExtent3D extent,
-                VulkanImageInfo imageInfo = {});
+            uint32_t find_memory_type(uint32_t type_filter, VkMemoryPropertyFlags properties) override;
+            VkFormat find_supported_format(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features) override;
+            VkFormat find_depth_format() override;
 
-            std::shared_ptr<VulkanImage> create_image(
-                VkImage& image);
-
-            std::shared_ptr<VulkanImageView> create_image_view(
-                VulkanImage& image,
-                VkFormat& imageFormat,
-                VulkanImageViewInfo imageViewInfo = {});
-
-            std::shared_ptr<VulkanDescriptorPool> create_descriptor_pool();
-
-            std::vector<std::shared_ptr<VulkanDescriptorSetLayout>> create_descriptor_set_layouts(
-                const std::vector<VulkanDescriptorSetLayoutBinding>& bindings);
-
-            std::shared_ptr<VulkanPipelineLayout> create_pipeline_layout(
-                const std::vector<std::shared_ptr<VulkanDescriptorSetLayout>>& layouts,
-                const std::vector<VulkanConstRange>& constantRanges);
-
-            std::shared_ptr<VulkanPipeline> create_pipeline(
-                std::shared_ptr<VulkanSwapChain>& swapChain,
-                std::shared_ptr<VulkanPipelineLayout>& pipelineLayout,
-                std::vector<std::shared_ptr<VulkanShaderModule>> shaderModules,
-                VulkanPipelineConfig configInfo = {});
-
-            std::shared_ptr<VulkanCommandBufferPool> create_command_buffer_pool();
-
-            std::shared_ptr<VulkanShaderModule> create_shader_module(
-                const std::string& shaderCodePath,
-                const ShaderType& type);
-
-            std::shared_ptr<VulkanSwapChain> create_swap_chain(std::shared_ptr<Window>& window);
-
-            void wait_idle();
-
-            VkDevice device() { return device_; }
-            VkSurfaceKHR surface() { return surface_; }
-            VkQueue graphicsQueue() { return graphicsQueue_; }
-            VkQueue presentQueue() { return presentQueue_; }
-
-            uint32_t find_memory_type(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-
-            QueueFamilyIndices find_physical_queue_families() { return VulkanDeviceChooser::find_queue_families(physicalDevice, surface_); }
-            SwapChainSupportDetails get_swap_chain_support() { return VulkanDeviceChooser::query_swap_chain_support(physicalDevice, surface_); }
-
-            VkFormat find_supported_format(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-
-            template <typename... Args>
-            void destroy_all(std::shared_ptr<Args>... args) {
-                (args->destroy(*this), ...);
-            }
-
-            template <typename... Args>
-            void destroy_all(std::vector<std::shared_ptr<Args>>... args) {
-                for(auto& arg : (args, ...)) {
-                    arg->destroy(*this);
-                }
-            }
-
-            void destroy();
-
-            VkFormat find_depth_format();
+            // Vulkan Device
+            [[nodiscard]] VkDevice get_vk_device() const override;
+            [[nodiscard]] VkSurfaceKHR get_surface() const override;
+            [[nodiscard]] VkQueue get_graphics_queue() const override;
+            [[nodiscard]] VkQueue get_present_queue() const override;
+            void wait_idle() const override;
     };
 }
 

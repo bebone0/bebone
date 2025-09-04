@@ -1,13 +1,14 @@
-#ifndef _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_2D_H_
-#define _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_2D_H_
+#ifndef _BEBONE_GFX_OPENGL_TEXTURE_2D_H_
+#define _BEBONE_GFX_OPENGL_TEXTURE_2D_H_
 
 #include "../../assets/image/image.h"
 
 #include "../gfx_backend.h"
+#include "../color_extensions.h"
 
 #include "opengl_texture.h"
 
-namespace bebone::gfx::opengl {
+namespace bebone::gfx {
     using namespace bebone::assets;
 
     class GLTexture2D : public GLTexture {
@@ -17,8 +18,10 @@ namespace bebone::gfx::opengl {
 
             void create_gl_texture();
 
-            template<typename _Color>
-            void create_gl_texture(const std::shared_ptr<Image<_Color>>& image);
+            void create_gl_texture(void* buffer, u32 format, u32 type);
+
+            template<typename Color>
+            void create_gl_texture(const std::shared_ptr<Image<Color>>& image);
 
         public:
             /*!
@@ -28,18 +31,20 @@ namespace bebone::gfx::opengl {
             */
             GLTexture2D(const int& width, const int& height);
 
+            GLTexture2D(const int& width, const int& height, void* buffer, u32 format, u32 type);
+
             /*!
             * Constructor, loads image from a file
-            * @param filePath - Image file path
+            * @param file_path - Image file path
             */
-            GLTexture2D(const std::string& filePath);
+            GLTexture2D(const std::string& file_path);
 
             /*!
             * Constructor, creates GLTexture2D from already loaded image
             * @param image - Image
             */
-            template<typename _Color>
-            GLTexture2D(const std::shared_ptr<Image<_Color>>& image);
+            template<typename Color>
+            GLTexture2D(const std::shared_ptr<Image<Color>>& image);
 
             // Getter for image width
             const int& get_width() const;

@@ -1,5 +1,5 @@
-#ifndef _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_1D_H_
-#define _BEBONE_GFX_OPENGL_OPENGL_TEXTURE_1D_H_
+#ifndef _BEBONE_GFX_OPENGL_TEXTURE_1D_H_
+#define _BEBONE_GFX_OPENGL_TEXTURE_1D_H_
 
 #include "../../assets/image/image.h"
 
@@ -7,7 +7,7 @@
 
 #include "opengl_texture.h"
 
-namespace bebone::gfx::opengl {
+namespace bebone::gfx {
     using namespace bebone::assets;
 
     // Todo need testing

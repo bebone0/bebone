@@ -5,12 +5,21 @@
 #include <exception>
 
 #include "../gfx_backend.h"
+#include "../gfx_api.h"
+#include "../glfw_context.h"
 
 #include "events/window_event.h"
 #include "events/input_event.h"
 
 #include "window_properties.h"
 #include "window_handler.h"
+
+#include "../../core/timestamp/timestamp.h"
+#include "../../core/timestamp/watch.h"
+
+namespace bebone::renderer {
+    class IRenderer;
+}
 
 namespace bebone::gfx {
     using namespace core;
@@ -20,8 +29,9 @@ namespace bebone::gfx {
         private:
             GLFWwindow* window;
 
-            InputHandler inputHandler;
-            WindowHandler windowHandler;
+            WindowHandler window_handler;
+
+            Watch watch;
 
         protected:
             int width;
@@ -43,13 +53,15 @@ namespace bebone::gfx {
              * @param height - window height
             */
             Window(const std::string& title, const int& width, const int& height, const WindowProperties& properties = {});
-            ~Window();
+            virtual ~Window();
 
             /*!
              * Function that checks does window want to close
              * @return - boolean value is window closing
             */
-            bool closing() const;
+            [[nodiscard]] bool closing() const;
+
+            void set_title(const std::string& title);
 
             /// Function that returns window width
             const int& get_width() const;
@@ -57,20 +69,28 @@ namespace bebone::gfx {
             /// Function that returns window height
             const int& get_height() const;
 
+            Vec2i get_size() const;
+
             /// Function that returns current window aspect ration
             f32 get_aspect() const;
 
             /// Function returns glfw window backend
             GLFWwindow* get_backend() const;
 
-            /// Function that executes all queued input actions
-            void execute_input_actions() const;
+            /// Gfx api
+            virtual GfxAPI get_api() const = 0;
+
+            const Watch& get_watch() const;
+
+            void end_frame();
+
+            void pull_events();
 
         private:
             /// GLFW window position change callbacks
-            static void glfw_window_pos_callback(GLFWwindow* glfwWindow, int xPos, int yPos);
+            static void glfw_window_pos_callback(GLFWwindow* glfw_window, int x_pos, int y_pos);
             /// GLFW window size change callbacks
-            static void glfw_window_size_callback(GLFWwindow* glfwWindow, int width, int height);
+            static void glfw_window_size_callback(GLFWwindow* glfw_window, int width, int height);
             /// GLFW window close callback
             static void glfw_window_close_callback(GLFWwindow* handle);
             /// GLFW window refresh callback
@@ -82,14 +102,16 @@ namespace bebone::gfx {
             /// GLFW window maximize callback
             static void glfw_window_maximize_callback(GLFWwindow* handle, int maximized);
             /// GLFW window framebuffer size callback
-            static void glfw_framebuffer_size_callback(GLFWwindow* glfwWindow, int width, int height);
+            static void glfw_framebuffer_size_callback(GLFWwindow* glfw_window, int width, int height);
             /// GLFW window content scale callback
-            static void glfw_window_content_scale_callback(GLFWwindow* handle, float xScale, float yScale);
+            static void glfw_window_content_scale_callback(GLFWwindow* handle, float x_scale, float y_scale);
 
             /// GLFW mouse button press callback
-            static void glfw_mouse_button_callback(GLFWwindow* glfwWindow, int button, int action, int mods);
+            static void glfw_mouse_button_callback(GLFWwindow* glfw_window, int button, int action, int mods);
+            /// GLFW mouse scroll delta callback
+            static void glfw_mouse_scroll_callback(GLFWwindow* glfw_window, double xoffset, double yoffset);
             /// GLFW key press callback
-            static void glfw_key_callback(GLFWwindow* glfwWindow, int key, int scancode, int action, int mods);
+            static void glfw_key_callback(GLFWwindow* glfw_window, int key, int scancode, int action, int mods);
 
     };
 }

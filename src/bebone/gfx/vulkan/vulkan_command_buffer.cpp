@@ -1,28 +1,32 @@
 #include "vulkan_command_buffer.h"
 
-#include "vulkan_device.h"
 #include "vulkan_pipeline_layout.h"
-#include "vulkan_command_buffer_pool.h"
 #include "vulkan_descriptor_set.h"
 
-namespace bebone::gfx::vulkan {
-    VulkanCommandBuffer::VulkanCommandBuffer(std::shared_ptr<VulkanDevice>& device, VulkanCommandBufferPool& commandBufferPool) {
-        VkCommandBufferAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = commandBufferPool.backend;
-        allocInfo.commandBufferCount = static_cast<uint32_t>(1);
+namespace bebone::gfx {
+    VulkanCommandBuffer::VulkanCommandBuffer(IVulkanDevice& device, IVulkanCommandBufferPool& command_buffer_pool) : device_owner(device) {
+        VkCommandBufferAllocateInfo alloc_info{};
 
-        if(vkAllocateCommandBuffers(device->device(), &allocInfo, &backend) != VK_SUCCESS) {
+        alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        alloc_info.commandPool = command_buffer_pool.get_vk_command_buffer_pool();
+        alloc_info.commandBufferCount = static_cast<uint32_t>(1); // Todo
+
+        if(vkAllocateCommandBuffers(device_owner.get_vk_device(), &alloc_info, &command_buffer) != VK_SUCCESS) {
+            LOG_ERROR("Failed to allocate command buffers");
             throw std::runtime_error("Failed to allocate command buffers !");
         }
+
+        LOG_TRACE("Allocated 1 command buffer");
     }
 
     VulkanCommandBuffer& VulkanCommandBuffer::begin_record() {
-        VkCommandBufferBeginInfo beginInfo{};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        VkCommandBufferBeginInfo begin_info{};
 
-        if(vkBeginCommandBuffer(backend, &beginInfo) != VK_SUCCESS) {
+        begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if(vkBeginCommandBuffer(command_buffer, &begin_info) != VK_SUCCESS) {
+            LOG_ERROR("Failed to being recording command buffer");
             throw std::runtime_error("failed to being recording command buffer");
         }
 
@@ -30,135 +34,216 @@ namespace bebone::gfx::vulkan {
     }
 
     VulkanCommandBuffer& VulkanCommandBuffer::end_record() {
-        if (vkEndCommandBuffer(backend) != VK_SUCCESS) {
+        if(vkEndCommandBuffer(command_buffer) != VK_SUCCESS) {
+            LOG_ERROR("Failed to end command buffer");
             throw std::runtime_error("failed to end command buffer");
         }
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::begin_render_pass(std::shared_ptr<VulkanSwapChain>& swapChain, const u32& frameBuffer) {
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = swapChain->renderTarget->renderPass->backend;
-        renderPassInfo.framebuffer = swapChain->renderTarget->swapChainFramebuffers[frameBuffer]->backend;
+    VulkanCommandBuffer& VulkanCommandBuffer::begin_render_pass(const VulkanSwapChain& swap_chain) {
+        const auto& frame = swap_chain.get_current_frame();
 
-        renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = swapChain->extent; // Todo not sure is extent is right, maybe there should be extent of render target
-
-        std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {{ 0.2f, 0.2f, 0.2f, 1.0f }};
-        clearValues[1].depthStencil = { 1.0f, 0 };
-
-        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-        renderPassInfo.pClearValues = clearValues.data();
-
-        vkCmdBeginRenderPass(backend, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+        begin_render_pass(
+            swap_chain.render_target->framebuffers[frame],
+            swap_chain.render_pass);
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::set_viewport(const i32& x, const i32& y, const u32& width, const u32& height) {
+    VulkanCommandBuffer& VulkanCommandBuffer::begin_render_pass(
+        const std::unique_ptr<VulkanRenderTarget>& render_target,
+        const std::unique_ptr<VulkanRenderPass>& render_pass,
+        const size_t& frame
+    ) {
+        begin_render_pass(
+            render_target->framebuffers[frame],
+            render_pass);
+
+        return *this;
+    }
+
+    // This function should have multiple variants, with swap chain or just with custom render target
+    VulkanCommandBuffer& VulkanCommandBuffer::begin_render_pass(
+        const std::unique_ptr<VulkanFramebuffer>& framebuffer,
+        const std::unique_ptr<VulkanRenderPass>& render_pass
+    ) {
+        VkRenderPassBeginInfo render_pass_info{};
+        render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        render_pass_info.renderPass = render_pass->render_pass;
+        render_pass_info.framebuffer = framebuffer->framebuffer;
+        render_pass_info.renderArea.offset = {0, 0};
+        render_pass_info.renderArea.extent = render_pass->get_extent(); // Todo not sure is extent is right, maybe there should be extent of render target
+
+        // Collect all clear values
+        auto clear_values = std::vector<VkClearValue> {};
+        clear_values.reserve(render_pass->get_attachments().size());
+
+        for(const auto& attachment : render_pass->get_attachments()) {
+            if(attachment.type == Color)
+                clear_values.push_back({ .color = { { 0.2f, 0.2f, 0.2f, 1.0f } } }); // Todo clear values should be allowed to be changet
+            else if(attachment.type == Depth)
+                clear_values.push_back({ .depthStencil = { 1.0f, 0 }}); // Todo clear values should be allowed to be changet
+        }
+
+        render_pass_info.clearValueCount = static_cast<uint32_t>(clear_values.size());
+        render_pass_info.pClearValues = clear_values.data();
+
+        vkCmdBeginRenderPass(command_buffer, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
+
+        return *this;
+    }
+
+    VulkanCommandBuffer& VulkanCommandBuffer::set_viewport(std::unique_ptr<Window>& window) {
+        // Flipped viewport
+        return set_viewport(0, window->get_height(), window->get_width(), -window->get_height());
+    }
+
+    VulkanCommandBuffer& VulkanCommandBuffer::set_viewport(const Vec2i& viewport, const f32& min_depth, const f32& max_depth) {
+        return set_viewport(0, 0, static_cast<f32>(viewport.x), static_cast<f32>(viewport.y), min_depth, max_depth);
+    }
+
+    VulkanCommandBuffer& VulkanCommandBuffer::set_viewport(
+        const f32& x,
+        const f32& y,
+        const f32& width,
+        const f32& height,
+        const f32& min_depth,
+        const f32& max_depth
+    ) {
         VkViewport viewport;
 
-        viewport.x = static_cast<float>(x);
-        viewport.y = static_cast<float>(y);
-        viewport.width = static_cast<float>(width);
-        viewport.height = static_cast<float>(height);
+        viewport.x = x;
+        viewport.y = y;
+        viewport.width = width;
+        viewport.height = height;
+        viewport.minDepth = min_depth;
+        viewport.maxDepth = max_depth;
 
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;   // Todo for now this set as default
+        vkCmdSetViewport(command_buffer, 0, 1, &viewport);
 
-        VkRect2D scissor = {{x, y}, {width, height}};
+        return *this;
+    }
 
-        vkCmdSetViewport(backend, 0, 1, &viewport);
-        vkCmdSetScissor(backend, 0, 1, &scissor);
+    VulkanCommandBuffer& VulkanCommandBuffer::set_scissors(
+        const i32& x,
+        const i32& y,
+        const u32& width,
+        const u32& height
+    ) {
+
+        VkRect2D scissor = { { x, y }, { width, height } };
+
+        vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
         return *this;
     }
 
     VulkanCommandBuffer& VulkanCommandBuffer::end_render_pass() {
-        vkCmdEndRenderPass(backend);
+        vkCmdEndRenderPass(command_buffer);
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::bind_pipeline(VulkanPipeline& pipeline) {
-        vkCmdBindPipeline(backend, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.backend);
+    // Todo VK_PIPELINE_BIND_POINT_GRAPHICS should be configured
+    VulkanCommandBuffer& VulkanCommandBuffer::bind_pipeline(const VulkanPipeline& pipeline) {
+        vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline);
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::bind_pipeline(std::shared_ptr<VulkanPipeline>& pipeline) {
-        vkCmdBindPipeline(backend, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->backend);
+    // Todo VK_PIPELINE_BIND_POINT_GRAPHICS should be configured
+    VulkanCommandBuffer& VulkanCommandBuffer::bind_pipeline(const std::unique_ptr<VulkanPipeline>& pipeline) {
+        vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->pipeline);
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::bind_vertex_buffer(std::shared_ptr<VulkanBuffer>& buffer) {
-        VkBuffer buffers[] = {buffer->backend};
-        VkDeviceSize offset[] = {0};
-        vkCmdBindVertexBuffers(backend, 0, 1, buffers, offset);
+    VulkanCommandBuffer& VulkanCommandBuffer::bind_vertex_buffer(IVulkanBuffer& buffer) {
+        VkBuffer buffers[] = { buffer.get_vk_buffer() };
+        VkDeviceSize offset[] = { 0 }; // Todo
+
+        vkCmdBindVertexBuffers(command_buffer, 0, 1, buffers, offset);
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::bind_index_buffer(std::shared_ptr<VulkanBuffer>& indexBuffer) {
-        // Todo, note that VK_INDEX_TYPE_UINT32 should match index size, akka for int should be used VK_INDEX_TYPE_UINT32
-        vkCmdBindIndexBuffer(backend, indexBuffer->backend, 0, VK_INDEX_TYPE_UINT32);
+    VulkanCommandBuffer& VulkanCommandBuffer::bind_index_buffer(IVulkanBuffer& buffer) {
+        vkCmdBindIndexBuffer(command_buffer, buffer.get_vk_buffer(), 0, VK_INDEX_TYPE_UINT32);
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::draw(const size_t& vertexCount) {
-        vkCmdDraw(backend, vertexCount, 1, 0, 0);
+    VulkanCommandBuffer& VulkanCommandBuffer::draw(const size_t& vertex_count) {
+        vkCmdDraw(command_buffer, vertex_count, 1, 0, 0);
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::draw_indexed(const size_t& indexCount) {
-        vkCmdDrawIndexed(backend, static_cast<uint32_t>(indexCount), 1, 0, 0, 0);
+    VulkanCommandBuffer& VulkanCommandBuffer::draw_indexed(const size_t& index_count) {
+        vkCmdDrawIndexed(command_buffer, static_cast<uint32_t>(index_count), 1, 0, 0, 0);
 
         return *this;
     }
 
-
-    VulkanCommandBuffer& VulkanCommandBuffer::bind_descriptor_set(std::shared_ptr<VulkanPipelineLayout>& pipelineLayout, std::shared_ptr<VulkanDescriptorSet>& descriptorSet) {
-        vkCmdBindDescriptorSets(backend, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout->get_layout(), 0, 1, &descriptorSet->backend, 0, nullptr);
-
-        return *this;
-    }
-
-    VulkanCommandBuffer& VulkanCommandBuffer::bind_descriptor_set(std::shared_ptr<VulkanPipelineLayout>& pipelineLayout, std::vector<std::shared_ptr<VulkanDescriptorSet>>& descriptorSets, const size_t& frame) {
-        vkCmdBindDescriptorSets(backend, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout->get_layout(), 0, 1, &descriptorSets[frame]->backend, 0, nullptr);
+    // Todo VK_PIPELINE_BIND_POINT_GRAPHICS should be configured
+    VulkanCommandBuffer& VulkanCommandBuffer::bind_descriptor_set(
+        const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+        const std::unique_ptr<VulkanDescriptorSet>& descriptor_set
+    ) {
+        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout->pipeline_layout, 0, 1, &descriptor_set->descriptor_set, 0, nullptr);
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::bind_descriptor_sets(std::shared_ptr<VulkanPipelineLayout>& pipelineLayout, std::vector<std::shared_ptr<VulkanDescriptorSet>>& descriptorSets) {
-        std::vector<VkDescriptorSet> sets;
-
-        for(const auto& descriptor : descriptorSets)
-            sets.push_back(descriptor->backend);
-
-        vkCmdBindDescriptorSets(backend, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout->get_layout(), 0, sets.size(), sets.data(), 0, nullptr);
-
-        return *this;
-    }
-
-    VulkanCommandBuffer& VulkanCommandBuffer::push_constant(std::shared_ptr<VulkanPipelineLayout>& pipelineLayout, const uint32_t& size, const void* constantPtr) {
-        vkCmdPushConstants(backend, pipelineLayout->get_layout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, size, constantPtr);
+    // Todo VK_PIPELINE_BIND_POINT_GRAPHICS should be configured
+    VulkanCommandBuffer& VulkanCommandBuffer::bind_descriptor_set(
+        const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+        const std::vector<std::unique_ptr<VulkanDescriptorSet>>& descriptor_sets,
+        const size_t& frame
+    ) {
+        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout->pipeline_layout, 0, 1, &descriptor_sets[frame]->descriptor_set, 0, nullptr);
 
         return *this;
     }
 
-    VulkanCommandBuffer& VulkanCommandBuffer::push_constant(std::shared_ptr<VulkanPipelineLayout>& pipelineLayout, const uint32_t& size, const size_t& offset, const void* constantPtr) {
-        vkCmdPushConstants(backend, pipelineLayout->get_layout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, offset, size, constantPtr);
+    // Todo VK_PIPELINE_BIND_POINT_GRAPHICS should be configured
+    VulkanCommandBuffer& VulkanCommandBuffer::bind_descriptor_sets(
+        const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+        const std::vector<std::unique_ptr<VulkanDescriptorSet>>& descriptor_sets
+    ) {
+        auto sets = std::vector<VkDescriptorSet> { };
+        sets.reserve(descriptor_sets.size());
+
+        for(const auto& descriptor : descriptor_sets)
+            sets.push_back(descriptor->descriptor_set);
+
+        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout->pipeline_layout, 0, sets.size(), sets.data(), 0, nullptr);
 
         return *this;
     }
 
-    void VulkanCommandBuffer::destroy(VulkanDevice&) {
+    // Todo VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT should be configured
+    VulkanCommandBuffer& VulkanCommandBuffer::push_constant(
+        const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+        const u32& size,
+        const void* ptr
+    ) {
+        vkCmdPushConstants(command_buffer, pipeline_layout->pipeline_layout, VK_SHADER_STAGE_ALL, 0, size, ptr); // Todo, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
 
+        return *this;
+    }
+
+    // Todo VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT should be configured
+    VulkanCommandBuffer& VulkanCommandBuffer::push_constant(
+        const std::unique_ptr<VulkanPipelineLayout>& pipeline_layout,
+        const uint32_t& size,
+        const size_t& offset,
+        const void* ptr
+    ) {
+        vkCmdPushConstants(command_buffer, pipeline_layout->pipeline_layout, VK_SHADER_STAGE_ALL, offset, size, ptr); // Todo, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
+
+        return *this;
     }
 }

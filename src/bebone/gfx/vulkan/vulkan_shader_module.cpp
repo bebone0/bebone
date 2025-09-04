@@ -1,20 +1,48 @@
 #include "vulkan_shader_module.h"
 
-#include "vulkan_device.h"
+namespace bebone::gfx {
+    VulkanShaderModule::VulkanShaderModule(IVulkanDevice& device, const ShaderCode& code) : device_owner(device), type(code.get_shader_type()) {
+        VkShaderModuleCreateInfo create_info{};
 
-namespace bebone::gfx::vulkan {
-    VulkanShaderModule::VulkanShaderModule(VulkanDevice& device, const ShaderCode& shaderCode) : shaderType(shaderCode.get_shader_type()) {
-        VkShaderModuleCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        createInfo.codeSize = shaderCode.get_byte_code().size() * sizeof(unsigned int);
-        createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.get_byte_code().data());
+        create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        create_info.codeSize = code.get_byte_code().size() * sizeof(unsigned int);
+        create_info.pCode = reinterpret_cast<const uint32_t*>(code.get_byte_code().data());
 
-        if(vkCreateShaderModule(device.device(), &createInfo, nullptr, &backend) != VK_SUCCESS) {
+        if(vkCreateShaderModule(device_owner.get_vk_device(), &create_info, nullptr, &shader_module) != VK_SUCCESS) {
+            LOG_ERROR("Failed to create shader module");
             throw std::runtime_error("Failed to create shader module");
         }
+
+        LOG_TRACE("Created Vulkan shader module");
     }
 
-    void VulkanShaderModule::destroy(VulkanDevice& device) {
-        vkDestroyShaderModule(device.device(), backend, nullptr);
+    VulkanShaderModule::VulkanShaderModule(IVulkanDevice& device, const std::string& source_code, const ShaderType& type) : device_owner(device), type(type) {
+        auto shader_compiler = SpirVShaderCompiler();
+
+        shader_compiler.add_shader_source(ShaderSource(
+                source_code,
+                type
+        ));
+
+        auto shader_code = shader_compiler.compile(type);
+
+        VkShaderModuleCreateInfo create_info{};
+
+        create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        create_info.codeSize = shader_code.get_byte_code().size() * sizeof(unsigned int);
+        create_info.pCode = reinterpret_cast<const uint32_t*>(shader_code.get_byte_code().data());
+
+        if(vkCreateShaderModule(device_owner.get_vk_device(), &create_info, nullptr, &shader_module) != VK_SUCCESS) {
+            LOG_ERROR("Failed to create shader module");
+            throw std::runtime_error("Failed to create shader module");
+        }
+
+        LOG_TRACE("Created Vulkan shader module");
+    }
+
+    VulkanShaderModule::~VulkanShaderModule() {
+        vkDestroyShaderModule(device_owner.get_vk_device(), shader_module, nullptr);
+
+        LOG_TRACE("Destroyed Vulkan shader module");
     }
 }

@@ -1,19 +1,15 @@
 #include "opengl_vertex_buffer_object.h"
 
-namespace bebone::gfx::opengl {
-    GLVertexBufferObject::GLVertexBufferObject(const void* vertices, const GLsizeiptr& size, const GLenum& usage) : GLBufferObject() {
+namespace bebone::gfx {
+    GLVertexBufferObject::GLVertexBufferObject(const void* vertices, const GLsizeiptr& size, const GLenum& usage) {
+        glGenBuffers(1, &id);
+        
         bind();
         glBufferData(GL_ARRAY_BUFFER, size, vertices, usage);
     }
 
     GLVertexBufferObject::~GLVertexBufferObject() {
         destroy();
-    }
-
-    void GLVertexBufferObject::buffer_sub_data(const GLintptr& offset, const GLsizeiptr& size, const void* data) {
-        bind();
-        glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
-        unbind();
     }
     
     void GLVertexBufferObject::bind() {
@@ -26,5 +22,11 @@ namespace bebone::gfx::opengl {
 
     void GLVertexBufferObject::destroy() {
         glDeleteBuffers(1, &id);
+    }
+    
+    void GLVertexBufferObject::buffer_sub_data(const GLintptr& offset, const GLsizeiptr& size, const void* data) {
+        bind();
+        glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+        unbind();
     }
 }

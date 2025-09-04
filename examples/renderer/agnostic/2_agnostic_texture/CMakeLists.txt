@@ -1,0 +1,7 @@
+file(GLOB_RECURSE BEBONE_EXAMPLE_RENDERER_AGNOSTIC_2_TEXTURE *.cpp)
+
+include_directories(".")
+include_directories(${BEBONE_INCLUDES})
+
+add_executable(Bebone_Example_Renderer_Agnostic_2_Agnostic_Texture ${BEBONE_EXAMPLE_RENDERER_AGNOSTIC_2_TEXTURE})
+target_link_libraries(Bebone_Example_Renderer_Agnostic_2_Agnostic_Texture bebone)
